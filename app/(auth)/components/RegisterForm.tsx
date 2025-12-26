@@ -87,7 +87,7 @@ export default function RegisterForm() {
             onClick={() => setShowPassword((p) => !p)}
             tabIndex={-1}
           >
-            {showPassword ? "Hide" : "Show"}
+            {showPassword ? <img src="/icons/eyeclosed.svg" className="h-5 w-5" alt="Hide"/> : <img src="/icons/eye.svg" className="h-5 w-5" alt="Show"/>}
           </button>
         </div>
         <div className="h-4">
@@ -116,7 +116,7 @@ export default function RegisterForm() {
             onClick={() => setShowConfirmPassword((p) => !p)}
             tabIndex={-1}
           >
-            {showConfirmPassword ? "Hide" : "Show"}
+            {showConfirmPassword ? <img src="/icons/eyeclosed.svg" className="h-5 w-5" alt="Hide"/> : <img src="/icons/eye.svg" className="h-5 w-5" alt="Show"/>}
           </button>
         </div>
         <div className="h-4">
@@ -140,11 +140,11 @@ export default function RegisterForm() {
         or continue with
       </div>
       <div className="flex justify-center items-center gap-12 mt-2">
-        <div className="bg-white w-24 h-9 rounded-4xl border flex items-center justify-center cursor-pointer">
-          Google
+        <div className="bg-white w-20 h-10 rounded-4xl border flex items-center justify-center cursor-pointer">
+          <img src={"/icons/google.svg"} className="w-5 h-5"/>
         </div>
-        <div className="bg-white w-24 h-9 rounded-4xl border flex items-center justify-center cursor-pointer">
-          Facebook
+        <div className="bg-white w-20 h-10 rounded-4xl border flex items-center justify-center cursor-pointer">
+          <img src={"/icons/facebook.svg"} className="w-5 h-5"/>
         </div>
       </div>
 

@@ -19,8 +19,8 @@ export default function Page() {
 
           {/* Right side */}
           <div className="flex items-center space-x-4">
-            <button className="hidden sm:block text-sm px-3 py-1 rounded-full bg-white shadow">
-              Nepal
+            <button className="hidden sm:block text-sm px-4 py-1 rounded-full bg-white shadow">
+              <img src="/icons/nepal.svg" className="w-5 h-5"/>
             </button>
 
             <input
