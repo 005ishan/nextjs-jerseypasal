@@ -36,7 +36,7 @@ export default function LoginForm() {
         }
 
         reset();
-        router.push("/");
+        router.push("/auth/dashboard");
       } catch (err: any) {
         setServerError(err.message ?? "Something went wrong. Try again.");
       }
