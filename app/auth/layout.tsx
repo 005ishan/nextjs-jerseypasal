@@ -1,9 +1,6 @@
-import Header from "./components/Header";
+"use client";
 
-export const metadata = {
-  title: "Dashboard",
-  description: "Dashboard page layout with header",
-};
+import Header from "./components/Header";
 
 export default function DashboardLayout({
   children,

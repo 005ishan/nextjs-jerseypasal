@@ -6,7 +6,7 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold text-white">Jerseyपसल</h3>
             <p className="mt-2 text-sm text-[#F8D35B] dark:text-gray-300">
-              Building awesome web experiences with Next.js 🚀
+              Best jersey selling websites in the town 👕
             </p>
           </div>
 
@@ -35,17 +35,17 @@ export default function Footer() {
             <h4 className="font-semibold text-[#F8D35B]">Follow Us</h4>
             <ul className="mt-2 space-y-1 text-sm text-white">
               <li>
-                <a href="#" className="hover:underline focus:outline-none focus:underline">
+                <a href="https://x.com/Ishanboy05" className="hover:underline focus:outline-none focus:underline">
                   Twitter
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:underline focus:outline-none focus:underline">
+                <a href="https://github.com/005ishan/nextjs-jerseypasal.git" className="hover:underline focus:outline-none focus:underline">
                   GitHub
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:underline focus:outline-none focus:underline">
+                <a href="https://www.linkedin.com/in/ishan-dhami-2799a9292/" className="hover:underline focus:outline-none focus:underline">
                   LinkedIn
                 </a>
               </li>
