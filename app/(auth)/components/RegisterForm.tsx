@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { registerSchema, RegisterData } from "../schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { registerUser } from "@/lib/api";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -25,23 +26,22 @@ export default function RegisterForm() {
   });
 
   const onSubmit = async (values: RegisterData) => {
-    setServerError(null);
+  setServerError(null);
 
-    startTransition(async () => {
-      try {
-        await new Promise((res) => setTimeout(res, 2000));
-
-        if (values.email === "fail@example.com") {
-          throw new Error("Email already in use");
-        }
-
-        reset();
-        router.push("/auth/dashboard");
-      } catch (err: any) {
-        setServerError(err.message ?? "Something went wrong. Try again.");
-      }
+  try {
+    await registerUser({
+      email: values.email,
+      password: values.password,
     });
-  };
+
+    reset();
+    router.push("/auth/dashboard");
+  } catch (err: any) {
+    setServerError(err.message ?? "Something went wrong. Try again.");
+  }
+};
+
+
 
   const loading = isSubmitting || pending;
 
