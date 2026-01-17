@@ -6,11 +6,11 @@ import { useForm } from "react-hook-form";
 import { LoginData, loginSchema } from "../schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { handleLogin } from "@/lib/actions/auth-action";
 
 export default function LoginForm() {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-
   const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -29,16 +29,13 @@ export default function LoginForm() {
 
     startTransition(async () => {
       try {
-        await new Promise((res) => setTimeout(res, 2000));
-
-        if (values.email === "fail@example.com") {
-          throw new Error("Invalid email or password");
-        }
+        // ✅ REAL LOGIN CALL
+        await handleLogin(values);
 
         reset();
         router.push("/auth/dashboard");
       } catch (err: any) {
-        setServerError(err.message ?? "Something went wrong. Try again.");
+        setServerError(err.message ?? "Invalid email or password");
       }
     });
   };
@@ -62,7 +59,6 @@ export default function LoginForm() {
           className="h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-background px-3 text-sm outline-none focus:border-foreground/40"
           {...register("email")}
         />
-        {/* Error message container with fixed height */}
         <div className="h-4">
           {errors.email?.message && (
             <p className="text-xs text-red-600">{errors.email.message}</p>
@@ -90,7 +86,11 @@ export default function LoginForm() {
             onClick={() => setShowPassword((p) => !p)}
             tabIndex={-1}
           >
-            {showPassword ? <img src="/icons/eyeclosed.svg" className="h-5 w-5" alt="Hide"/> : <img src="/icons/eye.svg" className="h-5 w-5" alt="Show"/>}
+            {showPassword ? (
+              <img src="/icons/eyeclosed.svg" className="h-5 w-5" alt="Hide" />
+            ) : (
+              <img src="/icons/eye.svg" className="h-5 w-5" alt="Show" />
+            )}
           </button>
         </div>
         <div className="h-4">
@@ -99,6 +99,7 @@ export default function LoginForm() {
           )}
         </div>
       </div>
+
       {/* FORGET PASSWORD */}
       <Link
         href="/forgot-password"
@@ -113,7 +114,7 @@ export default function LoginForm() {
         disabled={loading}
         className="h-10 w-full rounded-md bg-[#F25019] text-background text-sm font-semibold hover:opacity-90 disabled:opacity-60 mt-2"
       >
-        {loading ? " Logging in ↻ " : "Login"}
+        {loading ? "Logging in ↻" : "Login"}
       </button>
 
       {/* SOCIAL LOGIN */}
@@ -122,10 +123,10 @@ export default function LoginForm() {
       </div>
       <div className="flex justify-center items-center gap-12 mt-2">
         <div className="bg-white w-20 h-10 rounded-4xl border flex items-center justify-center cursor-pointer">
-          <img src={"/icons/google.svg"} className="w-5 h-5"/>
+          <img src="/icons/google.svg" className="w-5 h-5" />
         </div>
         <div className="bg-white w-20 h-10 rounded-4xl border flex items-center justify-center cursor-pointer">
-          <img src={"/icons/facebook.svg"} className="w-5 h-5"/>
+          <img src="/icons/facebook.svg" className="w-5 h-5" />
         </div>
       </div>
 
