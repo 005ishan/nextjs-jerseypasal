@@ -25,6 +25,14 @@ export const getAuthToken = async () => {
   return cookieStore.get("authToken")?.value || null;
 };
 
+export const setUserData = async (userData: UserData) => {
+  const cookieStore = cookies();
+  (await cookieStore).set({
+    name: "user_data",
+    value: JSON.stringify(userData),
+  });
+};
+
 export const getUserData = async () => {
   const cookieStore = await cookies();
   const userData = cookieStore.get("user_data")?.value || null;
