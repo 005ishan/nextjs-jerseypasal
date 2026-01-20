@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { registerSchema, RegisterData } from "../schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { handleRegister } from "@/lib/actions/auth-action";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -21,22 +22,21 @@ export default function RegisterForm() {
     formState: { errors, isSubmitting },
   } = useForm<RegisterData>({
     resolver: zodResolver(registerSchema),
-    mode: "onSubmit",
   });
 
   const onSubmit = async (values: RegisterData) => {
     setServerError(null);
-
     startTransition(async () => {
       try {
-        await new Promise((res) => setTimeout(res, 2000));
+        // ✅ REAL REGISTER CALL
+        const response = await handleRegister(values);
 
-        if (values.email === "fail@example.com") {
-          throw new Error("Email already in use");
+        if (response.success) {
+          reset();
+          router.push("/login"); // redirect to login after register
+        } else {
+          setServerError(response.message ?? "Something went wrong. Try again.");
         }
-
-        reset();
-        router.push("/auth/dashboard");
       } catch (err: any) {
         setServerError(err.message ?? "Something went wrong. Try again.");
       }
@@ -70,7 +70,10 @@ export default function RegisterForm() {
 
       {/* PASSWORD */}
       <div className="flex flex-col space-y-0.5">
-        <label htmlFor="password" className="text-[#161499] font-semibold mb-0.5">
+        <label
+          htmlFor="password"
+          className="text-[#161499] font-semibold mb-0.5"
+        >
           Password
         </label>
         <div className="relative">
@@ -87,7 +90,11 @@ export default function RegisterForm() {
             onClick={() => setShowPassword((p) => !p)}
             tabIndex={-1}
           >
-            {showPassword ? <img src="/icons/eyeclosed.svg" className="h-5 w-5" alt="Hide"/> : <img src="/icons/eye.svg" className="h-5 w-5" alt="Show"/>}
+            {showPassword ? (
+              <img src="/icons/eyeclosed.svg" className="h-5 w-5" alt="Hide" />
+            ) : (
+              <img src="/icons/eye.svg" className="h-5 w-5" alt="Show" />
+            )}
           </button>
         </div>
         <div className="h-4">
@@ -99,7 +106,10 @@ export default function RegisterForm() {
 
       {/* CONFIRM PASSWORD */}
       <div className="flex flex-col space-y-0.5">
-        <label htmlFor="confirmPassword" className="text-[#161499] font-semibold mb-0.5">
+        <label
+          htmlFor="confirmPassword"
+          className="text-[#161499] font-semibold mb-0.5"
+        >
           Confirm Password
         </label>
         <div className="relative">
@@ -116,12 +126,18 @@ export default function RegisterForm() {
             onClick={() => setShowConfirmPassword((p) => !p)}
             tabIndex={-1}
           >
-            {showConfirmPassword ? <img src="/icons/eyeclosed.svg" className="h-5 w-5" alt="Hide"/> : <img src="/icons/eye.svg" className="h-5 w-5" alt="Show"/>}
+            {showConfirmPassword ? (
+              <img src="/icons/eyeclosed.svg" className="h-5 w-5" alt="Hide" />
+            ) : (
+              <img src="/icons/eye.svg" className="h-5 w-5" alt="Show" />
+            )}
           </button>
         </div>
         <div className="h-4">
           {errors.confirmPassword?.message && (
-            <p className="text-xs text-red-600">{errors.confirmPassword.message}</p>
+            <p className="text-xs text-red-600">
+              {errors.confirmPassword.message}
+            </p>
           )}
         </div>
       </div>
@@ -132,7 +148,7 @@ export default function RegisterForm() {
         disabled={loading}
         className="h-9 w-full rounded-md bg-[#F25019] text-background text-sm font-semibold hover:opacity-90 disabled:opacity-60 mt-2"
       >
-        {loading ? " Creating user ↻ " : "Sign up"}
+        {loading ? "Creating user ↻" : "Sign up"}
       </button>
 
       {/* SOCIAL LOGIN */}
@@ -141,10 +157,10 @@ export default function RegisterForm() {
       </div>
       <div className="flex justify-center items-center gap-12 mt-2">
         <div className="bg-white w-20 h-10 rounded-4xl border flex items-center justify-center cursor-pointer">
-          <img src={"/icons/google.svg"} className="w-5 h-5"/>
+          <img src="/icons/google.svg" className="w-5 h-5" />
         </div>
         <div className="bg-white w-20 h-10 rounded-4xl border flex items-center justify-center cursor-pointer">
-          <img src={"/icons/facebook.svg"} className="w-5 h-5"/>
+          <img src="/icons/facebook.svg" className="w-5 h-5" />
         </div>
       </div>
 
