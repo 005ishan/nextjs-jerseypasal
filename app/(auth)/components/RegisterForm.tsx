@@ -22,19 +22,21 @@ export default function RegisterForm() {
     formState: { errors, isSubmitting },
   } = useForm<RegisterData>({
     resolver: zodResolver(registerSchema),
-    mode: "onSubmit",
   });
 
   const onSubmit = async (values: RegisterData) => {
     setServerError(null);
-
     startTransition(async () => {
       try {
         // ✅ REAL REGISTER CALL
-        await handleRegister(values);
+        const response = await handleRegister(values);
 
-        reset();
-        router.push("/login"); // redirect to login after register
+        if (response.success) {
+          reset();
+          router.push("/login"); // redirect to login after register
+        } else {
+          setServerError(response.message ?? "Something went wrong. Try again.");
+        }
       } catch (err: any) {
         setServerError(err.message ?? "Something went wrong. Try again.");
       }

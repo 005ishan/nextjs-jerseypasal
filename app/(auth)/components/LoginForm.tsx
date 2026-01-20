@@ -30,10 +30,14 @@ export default function LoginForm() {
     startTransition(async () => {
       try {
         // ✅ REAL LOGIN CALL
-        await handleLogin(values);
+        const response = await handleLogin(values);
 
-        reset();
+        if(response.success) {
+    reset();
         router.push("/auth/dashboard");
+        } else {
+          setServerError(response.message ?? "Invalid email or password");
+        }
       } catch (err: any) {
         setServerError(err.message ?? "Invalid email or password");
       }
