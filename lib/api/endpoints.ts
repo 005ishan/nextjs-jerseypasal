@@ -1,9 +1,9 @@
 export const AUTH = {
-  LOGIN: "/auth/login",
-  REGISTER: "/auth/register",
-  CREATE_USER: "/auth/register",
+  LOGIN: "/api/auth/login",
+  REGISTER: "/api/auth/register",
+  CREATE_USER: "/api/auth/register",
 };
 
 export const ADMIN = {
-  USERS: "/admin/users",
+  USERS: "/api/admin/users",
 };

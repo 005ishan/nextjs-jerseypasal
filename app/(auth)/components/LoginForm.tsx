@@ -5,11 +5,13 @@ import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { LoginData, loginSchema } from "../schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 import { handleLogin } from "@/lib/actions/auth-action";
+import Link from "next/link";
 
 export default function LoginForm() {
   const router = useRouter();
+  const { login } = useAuth(); // ✅ get login function from context
   const [pending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -29,12 +31,21 @@ export default function LoginForm() {
 
     startTransition(async () => {
       try {
-        // ✅ REAL LOGIN CALL
         const response = await handleLogin(values);
 
-        if(response.success) {
-    reset();
-        router.push("/auth/dashboard");
+        if (response.success && response.data) {
+          // ✅ update context immediately
+          login(response.data);
+
+          reset(); // reset form
+
+          // redirect based on role
+          const role = response.data.role;
+          if (role === "admin") {
+            router.push("/admin");
+          } else {
+            router.push("/auth/dashboard");
+          }
         } else {
           setServerError(response.message ?? "Invalid email or password");
         }
@@ -60,14 +71,12 @@ export default function LoginForm() {
           type="email"
           autoComplete="email"
           placeholder="yourmail@example.com"
-          className="h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-background px-3 text-sm outline-none focus:border-foreground/40"
+          className="h-10 w-full rounded-md border border-black/10 bg-background px-3 text-sm outline-none focus:border-foreground/40"
           {...register("email")}
         />
-        <div className="h-4">
-          {errors.email?.message && (
-            <p className="text-xs text-red-600">{errors.email.message}</p>
-          )}
-        </div>
+        {errors.email && (
+          <p className="text-xs text-red-600">{errors.email.message}</p>
+        )}
       </div>
 
       {/* PASSWORD */}
@@ -80,8 +89,8 @@ export default function LoginForm() {
             id="password"
             type={showPassword ? "text" : "password"}
             autoComplete="current-password"
-            placeholder="••••••••••"
-            className="h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-background px-3 pr-10 text-sm outline-none focus:border-foreground/40"
+            placeholder="••••••••"
+            className="h-10 w-full rounded-md border border-black/10 bg-background px-3 pr-10 text-sm outline-none focus:border-foreground/40"
             {...register("password")}
           />
           <button
@@ -90,21 +99,14 @@ export default function LoginForm() {
             onClick={() => setShowPassword((p) => !p)}
             tabIndex={-1}
           >
-            {showPassword ? (
-              <img src="/icons/eyeclosed.svg" className="h-5 w-5" alt="Hide" />
-            ) : (
-              <img src="/icons/eye.svg" className="h-5 w-5" alt="Show" />
-            )}
+            {showPassword ? "Hide" : "Show"}
           </button>
         </div>
-        <div className="h-4">
-          {errors.password?.message && (
-            <p className="text-xs text-red-600">{errors.password.message}</p>
-          )}
-        </div>
+        {errors.password && (
+          <p className="text-xs text-red-600">{errors.password.message}</p>
+        )}
       </div>
 
-      {/* FORGET PASSWORD */}
       <Link
         href="/forgot-password"
         className="text-[#161499] text-sm block text-right"
@@ -112,7 +114,6 @@ export default function LoginForm() {
         Forget Password?
       </Link>
 
-      {/* LOGIN BUTTON */}
       <button
         type="submit"
         disabled={loading}
@@ -121,24 +122,10 @@ export default function LoginForm() {
         {loading ? "Logging in ↻" : "Login"}
       </button>
 
-      {/* SOCIAL LOGIN */}
-      <div className="text-center mt-4 text-[#161499] text-sm">
-        or continue with
-      </div>
-      <div className="flex justify-center items-center gap-12 mt-2">
-        <div className="bg-white w-20 h-10 rounded-4xl border flex items-center justify-center cursor-pointer">
-          <img src="/icons/google.svg" className="w-5 h-5" />
-        </div>
-        <div className="bg-white w-20 h-10 rounded-4xl border flex items-center justify-center cursor-pointer">
-          <img src="/icons/facebook.svg" className="w-5 h-5" />
-        </div>
-      </div>
-
-      {/* REGISTER LINK */}
-      <p className="text-[#161499] text-sm block text-center mt-2">
-        Don't have an account yet?{" "}
-        <Link href="/register" className="font-semibold hover:underline">
-          Register for free
+      <p className="text-[#161499] text-sm text-center mt-2">
+        Don't have an account?{" "}
+        <Link href="/register" className="font-semibold">
+          Register
         </Link>
       </p>
     </form>

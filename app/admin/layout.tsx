@@ -7,14 +7,20 @@ import Header from "./_components/Header";
 import { useEffect } from "react";
 
 export default function AdminLayout({ children }: any) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth(); // ✅ get loading
   const router = useRouter();
 
   useEffect(() => {
-    if (!user || user.role !== "admin") {
-      router.replace("/login");
+    if (!loading && (!user || user.role !== "admin")) {
+      router.push("/login");
     }
-  }, [user]);
+  }, [user, loading, router]);
+
+  // Show loader while auth is loading
+  if (loading) return <div className="p-6">Loading...</div>;
+
+  // prevent rendering if user is not admin
+  if (!user || user.role !== "admin") return null;
 
   return (
     <div className="flex min-h-screen bg-gray-100">
