@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
 const NAV_LINKS = [
   { id: "adult", label: "Adult", href: "/adult" },
@@ -11,6 +12,8 @@ const NAV_LINKS = [
 ];
 
 export default function Header() {
+      const { logout, user } = useAuth();
+
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -46,6 +49,23 @@ export default function Header() {
               0
             </span>
           </div>
+           <div className="flex items-center gap-2">
+                        <div className="h-6 flex items-center justify-center text-xs font-semibold">
+                            {user?.email || 'Admin'}
+                        </div>
+                        <span className="text-sm font-medium sm:inline">
+                            <button
+                                onClick={() => {
+                                    logout();
+                                }}
+                                className="w-full border flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-foreground/5 transition-colors text-left"
+                            >
+                                Logout
+                            </button>
+                        </span>
+                    </div>
+
+          
 
           {/* Mobile Menu Button */}
           <button
@@ -55,6 +75,7 @@ export default function Header() {
             {mobileOpen ? "╳" : "☰"}
           </button>
         </div>
+        
       </div>
 
       {/* Mobile Menu */}

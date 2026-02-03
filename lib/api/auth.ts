@@ -1,10 +1,10 @@
 import { LoginData, RegisterData } from "@/app/(auth)/schema";
 import axios from "./axios";
-import { Api } from "./endpoints";
+import { AUTH } from "./endpoints";
 
 export const register = async (registerData: RegisterData) => {
   try {
-    const response = await axios.post(Api.Auth.Register, registerData);
+    const response = await axios.post(AUTH.REGISTER, registerData);
     return response.data;
   } catch (error: Error | any) {
     throw new Error(
@@ -15,7 +15,7 @@ export const register = async (registerData: RegisterData) => {
 
 export const login = async (loginData: LoginData) => {
   try {
-    const response = await axios.post(Api.Auth.Login, loginData);
+    const response = await axios.post(AUTH.LOGIN, loginData);
     return response.data;
   } catch (error: Error | any) {
     throw new Error(
