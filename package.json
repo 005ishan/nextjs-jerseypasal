@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -23,8 +23,12 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.69.0",
+    "react-hot-toast": "^2.6.0",
+    "react-toastify": "^11.0.5",
     "resolvers": "^1.0.0",
     "tailwind-merge": "^3.4.0",
+    "toast": "^0.5.4",
+    "toastify": "^2.0.1",
     "z": "^1.0.9",
     "zod": "^4.2.1"
   },
