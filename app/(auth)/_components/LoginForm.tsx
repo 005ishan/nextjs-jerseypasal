@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/context/AuthContext";
 import { handleLogin } from "@/lib/actions/auth-action";
 import Link from "next/link";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function LoginForm() {
@@ -38,8 +38,6 @@ export default function LoginForm() {
         if (response.success && response.data) {
           login(response.data);
           reset();
-
-          // ✅ success toast
           toast.success("Logged in successfully!", { position: "top-right" });
 
           const role = response.data.role;
@@ -67,8 +65,6 @@ export default function LoginForm() {
 
   return (
     <>
-      {/* ✅ Toast container */}
-      <ToastContainer />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
         {serverError && <p className="text-sm text-red-600">{serverError}</p>}
@@ -140,7 +136,7 @@ export default function LoginForm() {
             Register
           </Link>
         </p>
-      </form>
+      </form> 
     </>
   );
 }

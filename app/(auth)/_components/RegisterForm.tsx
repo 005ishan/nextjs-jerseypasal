@@ -7,6 +7,7 @@ import { registerSchema, RegisterData } from "../schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { handleRegister } from "@/lib/actions/auth-action";
+import { toast } from "react-toastify";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -26,19 +27,29 @@ export default function RegisterForm() {
 
   const onSubmit = async (values: RegisterData) => {
     setServerError(null);
+
     startTransition(async () => {
       try {
-        // ✅ REAL REGISTER CALL
         const response = await handleRegister(values);
 
         if (response.success) {
           reset();
-          router.push("/login"); // redirect to login after register
+
+          toast.success("Account created successfully 🎉");
+
+          // small delay so user sees the toast
+          setTimeout(() => {
+            router.push("/login");
+          }, 800);
         } else {
-          setServerError(response.message ?? "Something went wrong. Try again.");
+          const msg = response.message ?? "Something went wrong. Try again.";
+          setServerError(msg);
+          toast.error(msg);
         }
       } catch (err: any) {
-        setServerError(err.message ?? "Something went wrong. Try again.");
+        const msg = err.message ?? "Something went wrong. Try again.";
+        setServerError(msg);
+        toast.error(msg);
       }
     });
   };
