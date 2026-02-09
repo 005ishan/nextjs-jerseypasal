@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { handleResetPassword } from "@/lib/actions/auth-action";
-import { toast } from "react-toastify";
+import { AppToast } from "@/lib/toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -35,15 +35,17 @@ export default function ResetPasswordForm({ token }: { token: string }) {
 
   const onSubmit = async (data: ResetPasswordDTO) => {
     try {
-      const response = await handleResetPassword(token, data.password);
-      if (response.success) {
-        toast.success("Password reset successfully");
+      await AppToast.promise(handleResetPassword(token, data.password), {
+        loading: "Resetting your password...",
+        success: "Password reset successfully",
+        error: "Failed to reset password",
+      });
+
+      setTimeout(() => {
         router.replace("/login");
-      } else {
-        toast.error(response.message || "Failed to reset password");
-      }
-    } catch (error) {
-      toast.error("An unexpected error occurred");
+      }, 900);
+    } catch (err: any) {
+      AppToast.error(err.message || "An unexpected error occurred");
     }
   };
 
@@ -62,7 +64,7 @@ export default function ResetPasswordForm({ token }: { token: string }) {
           type="password"
           id="password"
           {...register("password")}
-          className="h-10 w-full rounded-md border border-black/10 bg-background px-3 pr-10 text-sm outline-none focus:border-foreground/40"
+          className="h-10 w-full rounded-md border border-black/10 bg-background px-3 text-sm outline-none focus:border-foreground/40"
         />
         {errors.password && (
           <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
@@ -80,7 +82,7 @@ export default function ResetPasswordForm({ token }: { token: string }) {
           type="password"
           id="confirmPassword"
           {...register("confirmPassword")}
-          className="h-10 w-full rounded-md border border-black/10 bg-background px-3 pr-10 text-sm outline-none focus:border-foreground/40"
+          className="h-10 w-full rounded-md border border-black/10 bg-background px-3 text-sm outline-none focus:border-foreground/40"
         />
         {errors.confirmPassword && (
           <p className="text-red-500 text-sm mt-1">
@@ -106,7 +108,7 @@ export default function ResetPasswordForm({ token }: { token: string }) {
         className="h-10 w-full rounded-md bg-[#F25019] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-60"
         disabled={isSubmitting}
       >
-        {isSubmitting ? "Resetting..." : "Reset Password"}
+        {isSubmitting ? "Updating password…" : "Reset Password"}
       </button>
     </form>
   );

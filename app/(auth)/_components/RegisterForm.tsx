@@ -7,7 +7,7 @@ import { registerSchema, RegisterData } from "../schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { handleRegister } from "@/lib/actions/auth-action";
-import { toast } from "react-toastify";
+import { AppToast } from "@/lib/toast";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -28,30 +28,27 @@ export default function RegisterForm() {
   const onSubmit = async (values: RegisterData) => {
     setServerError(null);
 
-    startTransition(async () => {
-      try {
-        const response = await handleRegister(values);
+    try {
+      const promise = handleRegister(values);
 
-        if (response.success) {
-          reset();
+      const response = await AppToast.promise(promise, {
+        loading: "Creating your account...",
+        success: "Account created successfully",
+        error: "Registration failed",
+      });
 
-          toast.success("Account created successfully 🎉");
+      if (response.success) {
+        reset();
 
-          // small delay so user sees the toast
-          setTimeout(() => {
-            router.push("/login");
-          }, 800);
-        } else {
-          const msg = response.message ?? "Something went wrong. Try again.";
-          setServerError(msg);
-          toast.error(msg);
-        }
-      } catch (err: any) {
-        const msg = err.message ?? "Something went wrong. Try again.";
-        setServerError(msg);
-        toast.error(msg);
+        setTimeout(() => {
+          router.push("/login");
+        }, 900);
+      } else {
+        setServerError(response.message ?? "Something went wrong.");
       }
-    });
+    } catch (err: any) {
+      AppToast.error(err.message ?? "Something went wrong.");
+    }
   };
 
   const loading = isSubmitting || pending;

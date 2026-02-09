@@ -8,7 +8,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/context/AuthContext";
 import { handleLogin } from "@/lib/actions/auth-action";
 import Link from "next/link";
-import { toast } from "react-toastify";
+import { AppToast } from "@/lib/toast";
+
 import "react-toastify/dist/ReactToastify.css";
 
 export default function LoginForm() {
@@ -38,7 +39,7 @@ export default function LoginForm() {
         if (response.success && response.data) {
           login(response.data);
           reset();
-          toast.success("Logged in successfully!", { position: "top-right" });
+          AppToast.success("Logged in successfully");
 
           const role = response.data.role;
           if (role === "admin") {
@@ -48,15 +49,10 @@ export default function LoginForm() {
           }
         } else {
           setServerError(response.message ?? "Invalid email or password");
-          toast.error(response.message ?? "Invalid email or password", {
-            position: "top-right",
-          });
+          AppToast.error(response.message ?? "Invalid email or password");
         }
       } catch (err: any) {
         setServerError(err.message ?? "Invalid email or password");
-        toast.error(err.message ?? "Invalid email or password", {
-          position: "top-right",
-        });
       }
     });
   };
@@ -65,7 +61,6 @@ export default function LoginForm() {
 
   return (
     <>
-
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
         {serverError && <p className="text-sm text-red-600">{serverError}</p>}
 
@@ -136,7 +131,7 @@ export default function LoginForm() {
             Register
           </Link>
         </p>
-      </form> 
+      </form>
     </>
   );
 }

@@ -1,11 +1,11 @@
 import { toast } from "react-toastify";
 
 export const AppToast = {
-  success: (msg: string) => toast.success(`✅ ${msg}`),
+  success: (msg: string) => toast.success(`${msg}`),
 
-  error: (msg: string) => toast.error(`❌ ${msg}`),
+  error: (msg: string) => toast.error(`${msg}`),
 
-  info: (msg: string) => toast.info(`ℹ️ ${msg}`),
+  info: (msg: string) => toast.info(`ℹ${msg}`),
 
   promise: async <T>(
     promise: Promise<T>,
@@ -16,9 +16,9 @@ export const AppToast = {
     },
   ) => {
     return toast.promise(promise, {
-      pending: `⏳ ${messages.loading}`,
+      pending: `${messages.loading}`,
       success: `🎉 ${messages.success}`,
-      error: `⚠️ ${messages.error}`,
+      error: `${messages.error}`,
     });
   },
 };

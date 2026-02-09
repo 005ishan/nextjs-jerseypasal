@@ -1,5 +1,10 @@
 "use server";
-import { login, register, requestPasswordReset, resetPassword } from "@/lib/api/auth";
+import {
+  login,
+  register,
+  requestPasswordReset,
+  resetPassword,
+} from "@/lib/api/auth";
 import { LoginData, RegisterData } from "@/app/(auth)/schema";
 import { setAuthToken, setUserData, clearAuthCookies } from "../cookie";
 import { redirect } from "next/navigation";
@@ -71,27 +76,27 @@ export const handleRequestPasswordReset = async (email: string) => {
     };
   }
 };
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5050";
+export async function handleResetPassword(token: string, newPassword: string) {
+  const url = `${BASE_URL}/api/auth/reset-password/${encodeURIComponent(
+    token,
+  )}`;
 
-export const handleResetPassword = async (
-  token: string,
-  newPassword: string,
-) => {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ newPassword }),
+  });
+
+  const text = await res.text();
+
   try {
-    const response = await resetPassword(token, newPassword);
-    if (response.success) {
-      return {
-        success: true,
-        message: "Password has been reset successfully",
-      };
-    }
-    return {
-      success: false,
-      message: response.message || "Reset password failed",
-    };
-  } catch (error: Error | any) {
-    return {
-      success: false,
-      message: error.message || "Reset password action failed",
-    };
+    const data = JSON.parse(text);
+    if (!res.ok) throw new Error(data.message || "Failed to reset password");
+    return data;
+  } catch {
+    throw new Error(text || "Server returned invalid response");
   }
-};
+}
