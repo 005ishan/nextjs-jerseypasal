@@ -84,7 +84,7 @@ export default function UpdateProductForm({ productId, onProductUpdated }: Updat
       if (!image) setPreview(res.data.data.imageUrl ? `${process.env.NEXT_PUBLIC_API_URL}${res.data.data.imageUrl}` : null);
 
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to update product");
+      toast.error(err.response?.data?.message || "Failed to update jersey");
     } finally {
       setLoading(false);
     }
@@ -92,7 +92,7 @@ export default function UpdateProductForm({ productId, onProductUpdated }: Updat
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto p-4 border rounded-lg shadow">
-      <h2 className="text-xl font-semibold">Update Product</h2>
+      <h2 className="text-xl font-semibold">Update Jersey</h2>
 
       {/* Image Preview */}
       <div className="mb-4">
@@ -159,7 +159,7 @@ export default function UpdateProductForm({ productId, onProductUpdated }: Updat
         disabled={loading}
         className="w-full bg-green-600 text-white py-2 rounded hover:opacity-90 disabled:opacity-60"
       >
-        {loading ? "Updating..." : "Update Product"}
+        {loading ? "Updating..." : "Update Jersey"}
       </button>
     </form>
   );

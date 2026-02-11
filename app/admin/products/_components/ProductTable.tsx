@@ -20,23 +20,22 @@ function DeleteModal({
   if (!isOpen) return null;
 
   return (
-    
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded p-6 w-80 shadow-lg">
-        <h3 className="text-lg font-semibold mb-4">Delete Product</h3>
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-96 shadow-lg">
+        <h3 className="text-xl font-semibold mb-4">Delete Product</h3>
         <p className="mb-6">
           Are you sure you want to delete <strong>{productName}</strong>?
         </p>
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600"
+            className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
           >
             Delete
           </button>
@@ -93,70 +92,88 @@ export default function ProductTable() {
     fetchProducts();
   }, []);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p className="text-center mt-10">Loading products...</p>;
 
   return (
-    <div className="overflow-x-auto px-6">
-      <table className="min-w-full border border-gray-200">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="px-6 py-3 text-left">Image</th>
-            <th className="px-6 py-3 text-left">Name</th>
-            <th className="px-6 py-3 text-left">Price</th>
-            <th className="px-6 py-3 text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((product) => {
-            const imageUrl = product.imageUrl
-              ? product.imageUrl.startsWith("http")
-                ? product.imageUrl
-                : `${process.env.NEXT_PUBLIC_API_URL}${product.imageUrl}`
-              : null;
+    <div className="p-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
+            Jersey Management
+          </h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            Add, Delete or Edit Jerseys available in the store.
+          </p>
+        </div>
+        <Link
+          href="/admin/products/create"
+          className="px-4 py-2 bg-primary text-white rounded hover:bg-gray-700"
+        >
+          Create Jersey
+        </Link>
+      </div>
 
-            return (
-              <tr key={product._id} className="border-t border-gray-200">
-                <td className="px-6 py-4">
-                  {imageUrl ? (
-                    <img
-                      src={imageUrl}
-                      alt={product.name}
-                      className="w-24 h-24 object-cover rounded"
-                    />
-                  ) : (
-                    <div className="w-24 h-24 bg-gray-300 flex items-center justify-center rounded text-xs text-gray-600">
-                      No Image
-                    </div>
-                  )}
-                </td>
-                <td className="px-6 py-4">{product.name}</td>
-                <td className="px-6 py-4">Rs. {product.price}</td>
-                <td className="px-6 py-4 space-x-2">
-                  <Link
-                    href={`/admin/products/${product._id}`}
-                    className="text-blue-500 hover:underline"
-                  >
-                    View
-                  </Link>
-                  <Link
-                    href={`/admin/products/${product._id}/edit`}
-                    className="text-green-500 hover:underline"
-                  >
-                    Edit
-                  </Link>
-                  <button
-                    onClick={() => openDeleteModal(product)}
-                    className="text-red-500 hover:underline"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      {/* Products Grid */}
+      <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {products.map((product) => {
+          const imageUrl = product.imageUrl
+            ? product.imageUrl.startsWith("http")
+              ? product.imageUrl
+              : `${process.env.NEXT_PUBLIC_API_URL}${product.imageUrl}`
+            : null;
 
+          return (
+            <div
+              key={product._id}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col"
+            >
+              {/* Product Image */}
+              <div className="w-full h-48 mb-4 bg-gray-100 rounded overflow-hidden">
+                {imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    No Image
+                  </div>
+                )}
+              </div>
+
+              {/* Product Info */}
+              <h2 className="font-semibold text-lg mb-2">{product.name}</h2>
+              <p className="text-gray-700 mb-4">Rs. {product.price}</p>
+
+              {/* Action Buttons */}
+              <div className="mt-auto flex gap-2">
+                <Link
+                  href={`/admin/products/${product._id}`}
+                  className="flex-1 px-3 py-1 bg-blue-900 text-white rounded hover:bg-blue-600 text-center"
+                >
+                  View
+                </Link>
+                <Link
+                  href={`/admin/products/${product._id}/edit`}
+                  className="flex-1 px-3 py-1 bg-gray-800 text-white rounded hover:bg-green-600 text-center"
+                >
+                  Edit
+                </Link>
+                <button
+                  onClick={() => openDeleteModal(product)}
+                  className="flex-1 px-3 py-1 bg-red-800 text-white rounded hover:bg-red-600 text-center"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Delete Modal */}
       <DeleteModal
         isOpen={isModalOpen}
         onClose={closeDeleteModal}

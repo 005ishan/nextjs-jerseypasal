@@ -77,7 +77,7 @@ export default function CreateProductForm({ onProductCreated }: CreateProductFor
       // Update parent table immediately
       if (onProductCreated) onProductCreated(createdProduct);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to create product");
+      toast.error(error.response?.data?.message || "Failed to create jersey");
     } finally {
       setLoading(false);
     }
@@ -85,7 +85,7 @@ export default function CreateProductForm({ onProductCreated }: CreateProductFor
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto p-4 border rounded-lg shadow">
-      <h2 className="text-xl font-semibold">Create Product</h2>
+      <h2 className="text-xl font-semibold">Create Jersey</h2>
 
       {/* Name */}
       <div className="space-y-1">
@@ -152,7 +152,7 @@ export default function CreateProductForm({ onProductCreated }: CreateProductFor
         disabled={loading}
         className="w-full bg-blue-600 text-white py-2 rounded hover:opacity-90 disabled:opacity-60"
       >
-        {loading ? "Creating..." : "Create Product"}
+        {loading ? "Creating..." : "Create Jersey"}
       </button>
     </form>
   );
