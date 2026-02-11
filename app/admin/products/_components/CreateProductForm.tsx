@@ -1,95 +1,159 @@
 "use client";
 
 import axios from "@/lib/api/axios";
-import { PRODUCT } from "@/lib/api/endpoints";
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { motion } from "framer-motion";
+import { useState, useRef } from "react";
 import { toast } from "react-toastify";
 
-export default function CreateProductForm() {
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
-  const [image, setImage] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  imageUrl?: string;
+}
 
-  const submit = async (e: React.FormEvent) => {
+interface CreateProductFormProps {
+  onProductCreated?: (product: Product) => void;
+}
+
+export default function CreateProductForm({ onProductCreated }: CreateProductFormProps) {
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState<number | "">("");
+  const [image, setImage] = useState<File | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Handle image selection & preview
+  const handleImageChange = (file: File | null) => {
+    setImage(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setPreviewImage(reader.result as string);
+      reader.readAsDataURL(file);
+    } else {
+      setPreviewImage(null);
+    }
+  };
+
+  // Clear selected image
+  const handleDismissImage = () => {
+    setImage(null);
+    setPreviewImage(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  // Submit product
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("price", price);
-    if (image) formData.append("image", image);
+    if (!name || !price) return toast.error("Name and price are required");
 
     try {
       setLoading(true);
-      await axios.post(PRODUCT.CREATE, formData);
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("price", price.toString());
 
-      toast.success("Product Created Successfully");
+      if (image) {
+        formData.append("image", image); // ⚡ Must match backend field name
+      }
 
+      // Send multipart/form-data request
+      const res = await axios.post("/admin/products", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const createdProduct: Product = res.data.data;
+
+      toast.success("Product created successfully");
+
+      // Reset form
       setName("");
       setPrice("");
-      setImage(null);
+      handleDismissImage();
+
+      // Update parent table immediately
+      if (onProductCreated) onProductCreated(createdProduct);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+      toast.error(error.response?.data?.message || "Failed to create product");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
+    <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto p-4 border rounded-lg shadow">
+      <h2 className="text-xl font-semibold">Create Product</h2>
+
+      {/* Name */}
+      <div className="space-y-1">
+        <label className="text-sm font-medium">Name</label>
+        <input
+          type="text"
+          className="w-full border rounded px-3 py-2"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+      </div>
+
+      {/* Price */}
+      <div className="space-y-1">
+        <label className="text-sm font-medium">Price</label>
+        <input
+          type="number"
+          className="w-full border rounded px-3 py-2"
+          value={price}
+          onChange={(e) => setPrice(Number(e.target.value))}
+          required
+        />
+      </div>
+
+      {/* Image Preview */}
+      <div className="mb-4">
+        {previewImage ? (
+          <div className="relative w-full h-48">
+            <img
+              src={previewImage}
+              alt="Product Preview"
+              className="w-full h-48 object-cover rounded-md"
+            />
+            <button
+              type="button"
+              onClick={handleDismissImage}
+              className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm hover:bg-red-600"
+            >
+              ✕
+            </button>
+          </div>
+        ) : (
+          <div className="w-full h-48 bg-gray-200 rounded-md flex items-center justify-center">
+            <span className="text-gray-600">No Image</span>
+          </div>
+        )}
+      </div>
+
+      {/* Image Input */}
+      <div className="space-y-1">
+        <label className="text-sm font-medium">Image</label>
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={(e) => handleImageChange(e.target.files?.[0] || null)}
+          accept=".jpg,.jpeg,.png,.webp"
+        />
+      </div>
+
+      {/* Submit */}
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-blue-600 text-white py-2 rounded hover:opacity-90 disabled:opacity-60"
       >
-        <Card className="rounded-2xl shadow-lg border">
-          <CardHeader>
-            <CardTitle className="text-2xl text-center">
-              Create Product
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent>
-            <form onSubmit={submit} className="space-y-4">
-              <div>
-                <Label>Product Name</Label>
-                <Input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div>
-                <Label>Price</Label>
-                <Input
-                  type="number"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div>
-                <Label>Image</Label>
-                <Input
-                  type="file"
-                  onChange={(e) => setImage(e.target.files?.[0] || null)}
-                />
-              </div>
-
-              <Button className="w-full rounded-xl" disabled={loading}>
-                {loading ? "Creating..." : "Create Product"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </motion.div>
-    </div>
+        {loading ? "Creating..." : "Create Product"}
+      </button>
+    </form>
   );
 }

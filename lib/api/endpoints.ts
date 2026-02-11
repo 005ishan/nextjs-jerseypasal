@@ -17,8 +17,8 @@ export const ADMIN = {
 };
 
 export const PRODUCT = {
-  CREATE: "/admin/products",
-  GET_ALL: "/admin/products",
-  UPDATE: (id: string) => `/admin/products/${id}`,
-  DELETE: (id: string) => `/admin/products/${id}`,
+  CREATE: "/api/admin/products",
+  GET_ALL: "/api/admin/products",
+  UPDATE: (id: string) => `/api/admin/products/${id}`,
+  DELETE: (id: string) => `/api/admin/products/${id}`,
 };
