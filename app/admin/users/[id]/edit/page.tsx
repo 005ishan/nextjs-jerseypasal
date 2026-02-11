@@ -1,56 +1,21 @@
-"use client";
+import { handleGetOneUser } from "@/lib/actions/admin/user-actions";
+import UpdateUserForm from "../../_components/UpdateUserForm";
+export default async function Page({
+    params
+}: {
+    params: Promise<{ id: string }>;
+}) {
+    const { id } = await params;
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+    const response = await handleGetOneUser(id);
 
-export default function EditUser({ params }: { params: { id: string } }) {
-  const router = useRouter();
+    if (!response.success) {
+        throw new Error(response.message || 'Failed to load user');
+    }
 
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState("");
-
-  useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${params.id}`)
-      .then((r) => r.json())
-      .then((data) => {
-        setEmail(data.email);
-        setRole(data.role);
-      });
-  }, [params.id]);
-
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${params.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, role }),
-    });
-
-    router.push("/admin/users");
-  };
-
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white rounded-xl shadow p-6 max-w-xl space-y-4"
-    >
-      <input
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="w-full border p-2 rounded"
-      />
-
-      <select
-        value={role}
-        onChange={(e) => setRole(e.target.value)}
-        className="w-full border p-2 rounded"
-      >
-        <option value="admin">Admin</option>
-        <option value="user">User</option>
-      </select>
-
-      <button className="bg-black text-white px-4 py-2 rounded">Save</button>
-    </form>
-  );
+    return (
+        <div>
+            <UpdateUserForm user={response.data} />
+        </div>
+    );
 }

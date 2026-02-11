@@ -146,7 +146,6 @@ const UserTable = (
                     <tr>
                         <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-400">ID</th>
                         <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Image</th>
-                        <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Name</th>
                         <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Email</th>
                         <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Role</th>
                         <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Actions</th>
@@ -171,7 +170,6 @@ const UserTable = (
                                     </div>
                                 )}
                             </td>
-                            <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{user.firstName || " " + user.lastName || " "}</td>
                             <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">{user.email}</td>
                             <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 text-capitalize">{user.role}</td>
                             <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">

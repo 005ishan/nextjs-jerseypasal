@@ -16,7 +16,7 @@ export default function DeleteModal({
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 ">
-      <div className="bg-black p-6 shadow-lg w-[300px] rounded-lg border border-white">
+      <div className="bg-white p-6 shadow-lg w-[300px] rounded-lg border border-white">
         <h2>{title}</h2>
         <p >{description}</p>
         <div className="mt-4 flex justify-end">

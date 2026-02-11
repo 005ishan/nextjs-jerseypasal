@@ -1,28 +1,36 @@
-async function getUser(id: string) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/users/${id}`,
-    { cache: "no-store" },
-  );
-
-  if (!res.ok) throw new Error("User not found");
-
-  return res.json();
-}
-
-export default async function UserDetails({
+import { handleGetOneUser } from "@/lib/actions/admin/user-actions";
+import Link from "next/link";
+export default async function Page({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const user = await getUser(params.id);
+  const { id } = await params;
+  const response = await handleGetOneUser(id);
+  if (!response.success) {
+    throw new Error(response.message || "Failed to load user");
+  }
 
   return (
-    <div className="bg-white rounded-xl shadow p-6 max-w-xl">
-      <h2 className="text-xl font-semibold mb-4">User Details</h2>
-
-      <p>Email: {user.email}</p>
-      <p>Role: {user.role}</p>
-      <p>Status: {user.status}</p>
+    <div>
+      <Link href="/admin/users" className="text-blue-500 hover:underline">
+        Back to Users
+      </Link>
+      <Link
+        href={`/admin/users/${id}/edit`}
+        className="text-green-500 hover:underline ml-4"
+      >
+        Edit User
+      </Link>
+      <h1 className="text-2xl font-bold mb-4 mt-2">User Details</h1>
+      <div className="border border-gray-300 rounded-lg p-4">
+        <p>
+          <strong>Email:</strong> {response.data.email}
+        </p>
+        <p>
+          <strong>Role:</strong> {response.data.role}
+        </p>
+      </div>
     </div>
   );
 }
