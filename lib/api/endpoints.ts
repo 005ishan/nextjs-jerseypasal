@@ -8,10 +8,17 @@ export const AUTH = {
 
 export const ADMIN = {
   USER: {
-     CREATE: "/api/admin/users",
-  GET_ALL: '/api/admin/users/',
-  GET_ONE: (userId: string) => `/api/admin/users/${userId}`,
-  UPDATE: (userId: string) => `/api/admin/users/${userId}`,
-  DELETE: (userId: string) => `/api/admin/users/${userId}`,
-  }
+    CREATE: "/api/admin/users",
+    GET_ALL: "/api/admin/users/",
+    GET_ONE: (userId: string) => `/api/admin/users/${userId}`,
+    UPDATE: (userId: string) => `/api/admin/users/${userId}`,
+    DELETE: (userId: string) => `/api/admin/users/${userId}`,
+  },
+};
+
+export const PRODUCT = {
+  CREATE: "/admin/products",
+  GET_ALL: "/admin/products",
+  UPDATE: (id: string) => `/admin/products/${id}`,
+  DELETE: (id: string) => `/admin/products/${id}`,
 };
