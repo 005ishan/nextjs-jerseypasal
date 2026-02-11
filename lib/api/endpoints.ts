@@ -7,5 +7,11 @@ export const AUTH = {
 };
 
 export const ADMIN = {
-  USERS: "/api/admin/users",
+  USER: {
+     CREATE: "/api/admin/users",
+  GET_ALL: '/api/admin/users/',
+  GET_ONE: (userId: string) => `/api/admin/users/${userId}`,
+  UPDATE: (userId: string) => `/api/admin/users/${userId}`,
+  DELETE: (userId: string) => `/api/admin/users/${userId}`,
+  }
 };

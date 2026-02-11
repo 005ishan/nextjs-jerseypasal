@@ -41,7 +41,10 @@ export default function LoginForm() {
           reset();
           AppToast.success("Logged in successfully");
 
-          const role = response.data.role;
+          const { token, role } = response.data;
+
+          localStorage.setItem("token", token);
+
           if (role === "admin") {
             router.push("/admin");
           } else {

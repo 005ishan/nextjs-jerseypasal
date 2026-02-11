@@ -33,15 +33,19 @@ export const handleRegister = async (data: RegisterData) => {
 export const handleLogin = async (data: LoginData) => {
   try {
     const response = await login(data);
-    if (response.success) {
-      await setAuthToken(response.token);
-      await setUserData(response.data);
-      return {
-        success: true,
-        message: "Login successful",
-        data: response.data,
-      };
-    }
+   if (response.success) {
+  await setAuthToken(response.token);
+  await setUserData(response.data);
+  return {
+    success: true,
+    message: "Login successful",
+    data: {
+      ...response.data,     // all user info
+      token: response.token // include the token
+    },
+  };
+}
+
     return {
       success: false,
       message: response.message || "Login failed",
