@@ -3,10 +3,10 @@ import Header from "./components/Header";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <section className="min-h-screen flex flex-col">
+    <section className="min-h-screen flex flex-col bg-[#faf7ff]">
       <Header />
 
-      <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <main className="flex-1 w-full">
         {children}
       </main>
 
