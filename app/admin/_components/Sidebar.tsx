@@ -9,6 +9,7 @@ export default function Sidebar() {
   const navItems = [
     { name: "Dashboard", href: "/admin" },
     { name: "Users", href: "/admin/users" },
+    { name: "Jersey", href: "/admin/products" },
   ];
 
   return (

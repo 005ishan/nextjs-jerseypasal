@@ -7,6 +7,7 @@ import { registerSchema, RegisterData } from "../schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { handleRegister } from "@/lib/actions/auth-action";
+import { AppToast } from "@/lib/toast";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -26,21 +27,28 @@ export default function RegisterForm() {
 
   const onSubmit = async (values: RegisterData) => {
     setServerError(null);
-    startTransition(async () => {
-      try {
-        // ✅ REAL REGISTER CALL
-        const response = await handleRegister(values);
 
-        if (response.success) {
-          reset();
-          router.push("/login"); // redirect to login after register
-        } else {
-          setServerError(response.message ?? "Something went wrong. Try again.");
-        }
-      } catch (err: any) {
-        setServerError(err.message ?? "Something went wrong. Try again.");
+    try {
+      const promise = handleRegister(values);
+
+      const response = await AppToast.promise(promise, {
+        loading: "Creating your account...",
+        success: "Account created successfully",
+        error: "Registration failed",
+      });
+
+      if (response.success) {
+        reset();
+
+        setTimeout(() => {
+          router.push("/login");
+        }, 900);
+      } else {
+        setServerError(response.message ?? "Something went wrong.");
       }
-    });
+    } catch (err: any) {
+      AppToast.error(err.message ?? "Something went wrong.");
+    }
   };
 
   const loading = isSubmitting || pending;
@@ -146,10 +154,14 @@ export default function RegisterForm() {
       <button
         type="submit"
         disabled={loading}
-        className="h-9 w-full rounded-md bg-[#F25019] text-background text-sm font-semibold hover:opacity-90 disabled:opacity-60 mt-2"
+        className="h-9 w-full rounded-md bg-[#F25019] text-background text-sm font-semibold hover:opacity-90 disabled:opacity-60 mt-2 flex items-center justify-center gap-2 cursor-pointer"
       >
-        {loading ? "Creating user ↻" : "Sign up"}
-      </button>
+        {loading && (
+          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+        )}
+
+        {loading ? "Creating user..." : "Sign up"}
+      </button> 
 
       {/* SOCIAL LOGIN */}
       <div className="text-center mt-3 text-[#161499] text-sm">

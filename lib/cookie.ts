@@ -14,14 +14,14 @@ interface UserData {
 export const setAuthToken = async (token: string) => {
   const cookieStore = cookies();
   (await cookieStore).set({
-    name: "authToken",
+    name: "token",
     value: token,
   });
 };
 
 export const getAuthToken = async () => {
   const cookieStore = await cookies();
-  return cookieStore.get("authToken")?.value || null;
+  return cookieStore.get("token")?.value || null;
 };
 
 export const setUserData = async (userData: UserData) => {
@@ -40,6 +40,6 @@ export const getUserData = async () => {
 
 export const clearAuthCookies = async () => {
   const cookieStore = await cookies();
-  cookieStore.delete("authToken");
+  cookieStore.delete("token");
   cookieStore.delete("user_data");
 };
