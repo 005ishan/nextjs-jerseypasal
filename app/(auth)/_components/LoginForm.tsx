@@ -123,9 +123,13 @@ export default function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="h-10 w-full rounded-md bg-[#F25019] text-background text-sm font-semibold hover:opacity-90 disabled:opacity-60 mt-2"
+          className="h-10 w-full rounded-md bg-[#F25019] text-background text-sm font-semibold hover:opacity-90 disabled:opacity-60 mt-2 flex items-center justify-center gap-2 cursor-pointer"
         >
-          {loading ? "Logging in ↻" : "Login"}
+          {loading && (
+            <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          )}
+
+          {loading ? "Logging in..." : "Login"}
         </button>
 
         <p className="text-[#161499] text-sm text-center mt-2">

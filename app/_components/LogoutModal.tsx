@@ -24,18 +24,18 @@ function LogoutModal({ isOpen, onClose, onConfirm }: { isOpen: boolean; onClose:
 
       {/* Modal */}
       <div className="relative bg-white dark:bg-gray-800 rounded-lg p-6 w-80 shadow-xl z-10">
-        <h3 className="text-xl font-semibold mb-4">Logout</h3>
+        <h3 className="text-xl font-semibold mb-4 cursor-pointer">Logout</h3>
         <p className="mb-6">Are you sure you want to logout?</p>
         <div className="flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+            className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 cursor-pointer"
           >
             Logout
           </button>

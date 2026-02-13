@@ -154,10 +154,14 @@ export default function RegisterForm() {
       <button
         type="submit"
         disabled={loading}
-        className="h-9 w-full rounded-md bg-[#F25019] text-background text-sm font-semibold hover:opacity-90 disabled:opacity-60 mt-2"
+        className="h-9 w-full rounded-md bg-[#F25019] text-background text-sm font-semibold hover:opacity-90 disabled:opacity-60 mt-2 flex items-center justify-center gap-2 cursor-pointer"
       >
-        {loading ? "Creating user ↻" : "Sign up"}
-      </button>
+        {loading && (
+          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+        )}
+
+        {loading ? "Creating user..." : "Sign up"}
+      </button> 
 
       {/* SOCIAL LOGIN */}
       <div className="text-center mt-3 text-[#161499] text-sm">
