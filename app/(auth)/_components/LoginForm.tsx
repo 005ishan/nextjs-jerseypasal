@@ -9,6 +9,8 @@ import { useAuth } from "@/context/AuthContext";
 import { handleLogin } from "@/lib/actions/auth-action";
 import Link from "next/link";
 import { AppToast } from "@/lib/toast";
+import { signIn } from "next-auth/react";
+import Image from "next/image";
 
 import "react-toastify/dist/ReactToastify.css";
 
@@ -111,6 +113,51 @@ export default function LoginForm() {
           {errors.password && (
             <p className="text-xs text-red-600">{errors.password.message}</p>
           )}
+        </div>
+
+        {/* Divider */}
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="bg-white px-2 text-gray-500">OR</span>
+          </div>
+        </div>
+
+        {/* SOCIAL BUTTONS ROW */}
+        <div className="flex gap-3">
+          {/* GOOGLE BUTTON */}
+          <button
+            type="button"
+            onClick={() => signIn("google", { callbackUrl: "/auth/dashboard" })}
+            className="flex-1 h-10 flex items-center justify-center gap-2 border border-gray-300 rounded-md hover:bg-gray-50 transition cursor-pointer"
+          >
+            <Image
+              src="/icons/google.svg"
+              alt="google"
+              width={18}
+              height={18}
+            />
+            <span className="text-sm font-medium">Google</span>
+          </button>
+
+          {/* FACEBOOK BUTTON */}
+          <button
+            type="button"
+            onClick={() =>
+              signIn("facebook", { callbackUrl: "/auth/dashboard" })
+            }
+            className="flex-1 h-10 flex items-center justify-center gap-2 border border-gray-300 rounded-md hover:bg-gray-50 transition cursor-pointer"
+          >
+            <Image
+              src="/icons/facebook.svg"
+              alt="facebook"
+              width={18}
+              height={18}
+            />
+            <span className="text-sm font-medium">Facebook</span>
+          </button>
         </div>
 
         <Link

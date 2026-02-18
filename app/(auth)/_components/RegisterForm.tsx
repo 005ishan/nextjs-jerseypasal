@@ -161,20 +161,7 @@ export default function RegisterForm() {
         )}
 
         {loading ? "Creating user..." : "Sign up"}
-      </button> 
-
-      {/* SOCIAL LOGIN */}
-      <div className="text-center mt-3 text-[#161499] text-sm">
-        or continue with
-      </div>
-      <div className="flex justify-center items-center gap-12 mt-2">
-        <div className="bg-white w-20 h-10 rounded-4xl border flex items-center justify-center cursor-pointer">
-          <img src="/icons/google.svg" className="w-5 h-5" />
-        </div>
-        <div className="bg-white w-20 h-10 rounded-4xl border flex items-center justify-center cursor-pointer">
-          <img src="/icons/facebook.svg" className="w-5 h-5" />
-        </div>
-      </div>
+      </button>
 
       {/* LOGIN LINK */}
       <p className="text-[#161499] text-sm block text-center mt-2">
