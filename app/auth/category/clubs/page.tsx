@@ -17,6 +17,9 @@ interface Product {
 export default function Page() {
   const [products, setProducts] = useState<Product[]>([]);
   const [favourites, setFavourites] = useState<string[]>([]);
+  const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>(
+    {},
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,13 +42,14 @@ export default function Page() {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
 
       if (!user?._id) {
-        alert("Please login first");
+        toast.error("Please login first");
         return;
       }
 
       await axios.post(`/api/users/${user._id}/favourite`, {
         productId,
       });
+
       if (favourites.includes(productId)) {
         setFavourites(favourites.filter((id) => id !== productId));
         toast.success("Removed from favourites");
@@ -56,6 +60,35 @@ export default function Page() {
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");
+    }
+  };
+
+  const addToCart = async (productId: string) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+      if (!user?._id) {
+        toast.error("Please login first");
+        return;
+      }
+
+      const selectedSize = selectedSizes[productId];
+
+      if (!selectedSize) {
+        toast.error("Please select a size");
+        return;
+      }
+
+      await axios.post(`/api/users/${user._id}/cart`, {
+        productId,
+        quantity: 1,
+        size: selectedSize,
+      });
+
+      toast.success("Added to cart 🛒");
+    } catch (error: any) {
+      console.error(error);
+      toast.error("Failed to add to cart");
     }
   };
 
@@ -81,7 +114,7 @@ export default function Page() {
                 key={product._id}
                 className="relative bg-gray-900 rounded-xl p-4 hover:scale-105 transition duration-300"
               >
-                {/* Favourite Icon */}
+                {/* Favourite */}
                 <button
                   onClick={() => toggleFavourite(product._id)}
                   className="absolute top-3 right-3"
@@ -103,17 +136,37 @@ export default function Page() {
 
                 <p className="mt-4 font-semibold text-center">{product.name}</p>
 
+                {/* Size Selector */}
                 {product.sizes && product.sizes.length > 0 && (
-                  <p className="text-gray-300 text-sm text-center mt-1">
-                    Sizes: {product.sizes.join(", ")}
-                  </p>
+                  <select
+                    className="mt-3 w-full bg-gray-800 p-2 rounded text-sm"
+                    onChange={(e) =>
+                      setSelectedSizes({
+                        ...selectedSizes,
+                        [product._id]: e.target.value,
+                      })
+                    }
+                    defaultValue=""
+                  >
+                    <option value="" disabled>
+                      Select Size
+                    </option>
+                    {product.sizes.map((size) => (
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
+                    ))}
+                  </select>
                 )}
 
-                <p className="text-center mt-2 font-medium">
+                <p className="text-center mt-3 font-medium">
                   Rs. {product.price}
                 </p>
 
-                <button className="mt-4 w-full bg-purple-600 hover:bg-purple-800 py-2 rounded-md text-sm font-medium cursor-pointer">
+                <button
+                  onClick={() => addToCart(product._id)}
+                  className="mt-4 w-full bg-purple-600 hover:bg-purple-800 py-2 rounded-md text-sm font-medium"
+                >
                   Add to Cart
                 </button>
               </div>

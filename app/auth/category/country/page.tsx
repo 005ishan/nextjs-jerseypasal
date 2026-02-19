@@ -21,6 +21,9 @@ interface User {
 export default function Page() {
   const [products, setProducts] = useState<Product[]>([]);
   const [favourites, setFavourites] = useState<string[]>([]);
+  const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>(
+    {},
+  );
   const [loading, setLoading] = useState(true);
 
   const user: User | null =
@@ -28,6 +31,7 @@ export default function Page() {
       ? JSON.parse(localStorage.getItem("user") || "null")
       : null;
 
+  // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -42,6 +46,7 @@ export default function Page() {
     fetchProducts();
   }, []);
 
+  // Fetch favourites
   useEffect(() => {
     const fetchFavourites = async () => {
       if (!user?._id) return;
@@ -60,6 +65,7 @@ export default function Page() {
     fetchFavourites();
   }, [user?._id]);
 
+  // Toggle favourite
   const toggleFavourite = async (productId: string) => {
     if (!user?._id) {
       toast.error("Please login first");
@@ -82,12 +88,38 @@ export default function Page() {
     }
   };
 
+  // Add to cart
+  const addToCart = async (productId: string) => {
+    if (!user?._id) {
+      toast.error("Please login first");
+      return;
+    }
+
+    const size = selectedSizes[productId];
+    if (!size) {
+      toast.error("Please select a size");
+      return;
+    }
+
+    try {
+      await axios.post(`/api/users/${user._id}/cart`, {
+        productId,
+        quantity: 1,
+        size,
+      });
+      toast.success("Added to cart 🛒");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to add to cart");
+    }
+  };
+
   if (loading)
     return <p className="text-center mt-10 text-white">Loading jerseys...</p>;
 
   return (
-    <section className="bg-gray-950 min-h-screen text-white">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
+    <section className="bg-gray-950 min-h-screen text-white py-14">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <h1 className="text-4xl font-bold mb-10">Country Jerseys</h1>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -119,6 +151,7 @@ export default function Page() {
                   />
                 </button>
 
+                {/* Product Image */}
                 <img
                   src={imageUrl}
                   alt={product.name}
@@ -127,17 +160,37 @@ export default function Page() {
 
                 <p className="mt-4 font-semibold text-center">{product.name}</p>
 
+                {/* Size Selector */}
                 {product.sizes && product.sizes.length > 0 && (
-                  <p className="text-gray-300 text-sm text-center mt-1">
-                    Sizes: {product.sizes.join(", ")}
-                  </p>
+                  <select
+                    className="mt-3 w-full bg-gray-800 p-2 rounded text-sm"
+                    onChange={(e) =>
+                      setSelectedSizes({
+                        ...selectedSizes,
+                        [product._id]: e.target.value,
+                      })
+                    }
+                    defaultValue=""
+                  >
+                    <option value="" disabled>
+                      Select Size
+                    </option>
+                    {product.sizes.map((size) => (
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
+                    ))}
+                  </select>
                 )}
 
                 <p className="text-center mt-2 font-medium">
                   Rs. {product.price}
                 </p>
 
-                <button className="mt-4 w-full bg-purple-600 hover:bg-purple-800 py-2 rounded-md text-sm font-medium cursor-pointer">
+                <button
+                  onClick={() => addToCart(product._id)}
+                  className="mt-4 w-full bg-purple-600 hover:bg-purple-800 py-2 rounded-md text-sm font-medium"
+                >
                   Add to Cart
                 </button>
               </div>

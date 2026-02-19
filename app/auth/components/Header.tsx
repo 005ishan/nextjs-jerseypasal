@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { usePathname } from "next/navigation";
+import axios from "@/lib/api/axios";
 
 const NAV_LINKS = [
   { id: "home", label: "Home", href: "/auth/dashboard" },
@@ -12,10 +13,108 @@ const NAV_LINKS = [
   { id: "settings", label: "Settings", href: "/auth/settings" },
 ];
 
+interface ProductSuggestion {
+  _id: string;
+  name: string;
+  imageUrl?: string;
+  category: "club" | "country";
+}
+
+interface CartItem {
+  quantity: number;
+}
+
+interface FavouriteItem {
+  _id: string;
+}
+
 export default function Header() {
   const { logout, user } = useAuth();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Search
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<ProductSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  // Cart & Favourites badges
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [favourites, setFavourites] = useState<FavouriteItem[]>([]);
+
+  // Fetch cart items
+  useEffect(() => {
+    if (!user?._id) return;
+
+    const fetchCart = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get(`/api/users/${user._id}/cart`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setCart(res.data);
+      } catch (error) {
+        console.error("Failed to fetch cart for header", error);
+      }
+    };
+
+    const fetchFavourites = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get(`/api/users/${user._id}/favourite`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setFavourites(res.data);
+      } catch (error) {
+        console.error("Failed to fetch favourites for header", error);
+      }
+    };
+
+    fetchCart();
+    fetchFavourites();
+  }, [user?._id]);
+
+  const totalCartQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Debounced search
+  useEffect(() => {
+    if (!searchQuery) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const delayDebounce = setTimeout(async () => {
+      try {
+        const res = await axios.get(
+          `/admin/products/search?query=${searchQuery}`
+        );
+        setSuggestions(res.data.data || []);
+        setShowSuggestions(true);
+      } catch (error) {
+        console.error("Search error:", error);
+        setSuggestions([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
+
+  // Click outside to close search suggestions
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () =>
+      document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full bg-gray-950 border-b border-gray-800 backdrop-blur">
@@ -43,26 +142,71 @@ export default function Header() {
         </nav>
 
         {/* Right Section */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 relative">
           {/* Search */}
-          <div className="hidden md:block">
+          <div className="relative" ref={searchRef}>
             <input
+              type="text"
               placeholder="Search jerseys..."
-              className="rounded-full px-4 py-2 text-sm bg-gray-800 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-600"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="rounded-full px-4 py-2 text-sm bg-gray-800 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-600 w-64 transition shadow-md"
             />
+
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 bg-gray-900 border border-gray-700 rounded-xl mt-2 shadow-2xl max-h-72 overflow-y-auto z-50 transition-all duration-200">
+                {suggestions.map((product) => {
+                  const imageUrl = product.imageUrl
+                    ? product.imageUrl.startsWith("http")
+                      ? product.imageUrl
+                      : `http://localhost:5050${product.imageUrl}`
+                    : "/images/no-image.png";
+
+                  return (
+                    <Link
+                      key={product._id}
+                      href={`/auth/product/${product._id}`}
+                      onClick={() => setShowSuggestions(false)}
+                      className="flex items-center gap-3 p-3 hover:bg-gray-800 transition rounded-lg"
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={product.name}
+                        className="w-12 h-12 object-cover rounded-lg shadow-sm"
+                      />
+                      <div className="flex flex-col">
+                        <p className="text-sm font-medium text-white truncate">
+                          {product.name}
+                        </p>
+                        <p className="text-xs text-gray-400 capitalize truncate">
+                          {product.category}
+                        </p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Favourites */}
           <Link href="/auth/favourites" className="relative text-xl text-white">
             ❤︎
+            {favourites.length > 0 && (
+              <span className="absolute -top-2 -right-2 text-xs bg-purple-600 text-white rounded-full h-5 w-5 flex items-center justify-center">
+                {favourites.length}
+              </span>
+            )}
           </Link>
 
           {/* Cart */}
           <Link href="/auth/Cart" className="relative text-xl text-white">
             🛒
-            <span className="absolute -top-2 -right-2 text-xs bg-purple-600 text-white rounded-full h-5 w-5 flex items-center justify-center">
-              0
-            </span>
+            {totalCartQuantity > 0 && (
+              <span className="absolute -top-2 -right-2 text-xs bg-purple-600 text-white rounded-full h-5 w-5 flex items-center justify-center">
+                {totalCartQuantity}
+              </span>
+            )}
           </Link>
 
           {/* User Section */}
@@ -107,15 +251,27 @@ export default function Header() {
                 </Link>
               ))}
 
-              <Link href="/favourites" onClick={() => setMobileOpen(false)}>
+              <Link
+                href="/auth/favourites"
+                onClick={() => setMobileOpen(false)}
+                className="hover:text-purple-400 transition"
+              >
                 Favourites
               </Link>
 
-              <Link href="/cart" onClick={() => setMobileOpen(false)}>
+              <Link
+                href="/auth/Cart"
+                onClick={() => setMobileOpen(false)}
+                className="hover:text-purple-400 transition"
+              >
                 Cart
               </Link>
 
-              <Link href="/settings" onClick={() => setMobileOpen(false)}>
+              <Link
+                href="/auth/settings"
+                onClick={() => setMobileOpen(false)}
+                className="hover:text-purple-400 transition"
+              >
                 Settings
               </Link>
             </nav>
