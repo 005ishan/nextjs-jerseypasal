@@ -10,18 +10,20 @@ interface Product {
   _id: string;
   name: string;
   price: number;
+  category: "club" | "country";
+  sizes?: string[];
   imageUrl?: string;
 }
 
 export default function ProductDetailsPage() {
-  const params = useParams(); // ✅ get dynamic route params in client component
+  const params = useParams();
   const productId = params?.id;
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!productId) return; // safeguard
+    if (!productId) return;
 
     const fetchProduct = async () => {
       try {
@@ -37,8 +39,8 @@ export default function ProductDetailsPage() {
     fetchProduct();
   }, [productId]);
 
-  if (loading) return <p>Loading...</p>;
-  if (!product) return <p>Product not found</p>;
+  if (loading) return <p className="text-center mt-10">Loading...</p>;
+  if (!product) return <p className="text-center mt-10">Product not found</p>;
 
   const imageUrl = product.imageUrl
     ? product.imageUrl.startsWith("http")
@@ -49,11 +51,12 @@ export default function ProductDetailsPage() {
   return (
     <div className="max-w-lg mx-auto p-4 border rounded shadow">
       <Link href="/admin/products" className="text-blue-500 hover:underline">
-        Back to Products
+        ← Back to Products
       </Link>
 
       <h1 className="text-2xl font-bold mt-2 mb-4">{product.name}</h1>
 
+      {/* Image */}
       {imageUrl ? (
         <img
           src={imageUrl}
@@ -66,9 +69,18 @@ export default function ProductDetailsPage() {
         </div>
       )}
 
-      <p>
+      {/* Details */}
+      <p className="mb-1">
         <strong>Price:</strong> Rs. {product.price}
       </p>
+      <p className="mb-1">
+        <strong>Category:</strong> {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
+      </p>
+      {product.sizes && product.sizes.length > 0 && (
+        <p className="mb-1">
+          <strong>Sizes:</strong> {product.sizes.join(", ")}
+        </p>
+      )}
     </div>
   );
 }

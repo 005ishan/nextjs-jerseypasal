@@ -24,13 +24,13 @@ function LogoutModal({
         <div className="flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+            className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 cursor-pointer"
           >
             Logout
           </button>
@@ -67,7 +67,7 @@ export default function Header() {
           {/* Left: Logo & Title */}
           <div className="flex items-center gap-3">
             <Link href="/admin" className="flex items-center gap-2 group">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-orange-500 text-white font-semibold">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-orange-500 text-white font-semibold cursor-pointer">
                 A
               </span>
               <span className="text-base font-semibold tracking-tight text-white group-hover:opacity-80 transition-opacity">
@@ -83,7 +83,7 @@ export default function Header() {
             </div>
             <button
               onClick={() => setIsLogoutOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-md bg-red-500 hover:bg-orange-500 hover:text-white text-gray-200 transition-colors text-sm font-medium"
+              className="flex items-center gap-2 px-4 py-2 rounded-md bg-red-500 hover:bg-orange-500 hover:text-white text-gray-200 transition-colors text-sm font-medium cursor-pointer"
             >
               Logout
             </button>

@@ -3,15 +3,21 @@
 import axios from "@/lib/api/axios";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
+import { Product } from "@/types/product.type";
 
 interface UpdateProductFormProps {
   productId: string;
-  onProductUpdated?: (product: any) => void; // optional callback to update table
+  onProductUpdated?: (product: Product) => void; // optional callback to update parent table
 }
 
-export default function UpdateProductForm({ productId, onProductUpdated }: UpdateProductFormProps) {
+export default function UpdateProductForm({
+  productId,
+  onProductUpdated,
+}: UpdateProductFormProps) {
   const [name, setName] = useState("");
   const [price, setPrice] = useState<number | "">("");
+  const [category, setCategory] = useState<Product["category"]>("club");
+  const [sizes, setSizes] = useState<string[]>([]);
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -22,12 +28,16 @@ export default function UpdateProductForm({ productId, onProductUpdated }: Updat
     const fetchProduct = async () => {
       try {
         const res = await axios.get(`/admin/products/${productId}`);
-        setName(res.data.data.name);
-        setPrice(res.data.data.price);
+        const product: Product = res.data.data;
+
+        setName(product.name);
+        setPrice(product.price);
+        setCategory(product.category);
+        setSizes(product.sizes || []);
         setPreview(
-          res.data.data.imageUrl
-            ? `${process.env.NEXT_PUBLIC_API_URL}${res.data.data.imageUrl}`
-            : null
+          product.imageUrl
+            ? `${process.env.NEXT_PUBLIC_API_URL}${product.imageUrl}`
+            : null,
         );
       } catch (err: any) {
         toast.error(err.response?.data?.message || "Failed to load product");
@@ -53,6 +63,17 @@ export default function UpdateProductForm({ productId, onProductUpdated }: Updat
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  // Handle sizes input (comma separated)
+  const handleSizesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSizes(
+      value
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -63,26 +84,25 @@ export default function UpdateProductForm({ productId, onProductUpdated }: Updat
       const formData = new FormData();
       formData.append("name", name);
       formData.append("price", price.toString());
+      formData.append("category", category);
+      formData.append("sizes", JSON.stringify(sizes));
 
-      if (image) {
-        formData.append("image", image); // ⚡ Ensure this matches backend field
-      }
+      if (image) formData.append("image", image);
 
       const res = await axios.put(`/admin/products/${productId}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       toast.success("Product updated successfully");
-
-      // Optional: update parent table immediately
       if (onProductUpdated) onProductUpdated(res.data.data);
 
       // Reset image input if needed
       setImage(null);
-      if (!image) setPreview(res.data.data.imageUrl ? `${process.env.NEXT_PUBLIC_API_URL}${res.data.data.imageUrl}` : null);
-
+      setPreview(
+        res.data.data.imageUrl
+          ? `${process.env.NEXT_PUBLIC_API_URL}${res.data.data.imageUrl}`
+          : null,
+      );
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to update jersey");
     } finally {
@@ -91,7 +111,10 @@ export default function UpdateProductForm({ productId, onProductUpdated }: Updat
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto p-4 border rounded-lg shadow">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 max-w-md mx-auto p-4 border rounded-lg shadow"
+    >
       <h2 className="text-xl font-semibold">Update Jersey</h2>
 
       {/* Image Preview */}
@@ -142,6 +165,31 @@ export default function UpdateProductForm({ productId, onProductUpdated }: Updat
         />
       </div>
 
+      {/* Category */}
+      <div className="space-y-1">
+        <label className="text-sm font-medium">Category</label>
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value as Product["category"])}
+          className="w-full border rounded px-3 py-2"
+        >
+          <option value="club">Club</option>
+          <option value="country">Country</option>
+        </select>
+      </div>
+
+      {/* Sizes */}
+      <div className="space-y-1">
+        <label className="text-sm font-medium">Sizes (comma separated)</label>
+        <input
+          type="text"
+          className="w-full border rounded px-3 py-2"
+          value={sizes.join(", ")}
+          onChange={handleSizesChange}
+          placeholder="S, M, L, XL"
+        />
+      </div>
+
       {/* Image Input */}
       <div className="space-y-1">
         <label className="text-sm font-medium">Image</label>
@@ -153,7 +201,7 @@ export default function UpdateProductForm({ productId, onProductUpdated }: Updat
         />
       </div>
 
-      {/* Submit Button */}
+      {/* Submit */}
       <button
         type="submit"
         disabled={loading}

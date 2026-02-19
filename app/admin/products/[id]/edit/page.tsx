@@ -20,10 +20,17 @@ export default function UpdateProductPage() {
         </Link>
       </div>
 
+      {/* Page Title */}
       <h1 className="text-2xl font-bold mb-4">Edit Jersey</h1>
 
+      {/* Form */}
       <div className="w-full max-w-md">
-        <UpdateProductForm productId={productId} />
+        <UpdateProductForm
+          productId={productId}
+          onProductUpdated={(updatedProduct) => {
+            console.log("Product updated:", updatedProduct);
+          }}
+        />
       </div>
     </div>
   );

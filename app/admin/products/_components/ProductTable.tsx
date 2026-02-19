@@ -102,8 +102,8 @@ export default function ProductTable() {
           <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
             Jersey Management
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Add, Delete or Edit Jerseys available in the store.
+          <p className="text-gray-500 text-sm mt-1">
+            Add, Delete, or Edit Jerseys available in the store.
           </p>
         </div>
         <Link
@@ -144,8 +144,16 @@ export default function ProductTable() {
               </div>
 
               {/* Product Info */}
-              <h2 className="font-semibold text-lg mb-2">{product.name}</h2>
-              <p className="text-gray-700 mb-4">Rs. {product.price}</p>
+              <h2 className="font-semibold text-lg mb-1">{product.name}</h2>
+              <p className="text-gray-700 mb-1">Rs. {product.price}</p>
+              <p className="text-gray-500 mb-1 text-sm">
+                Category: {product.category}
+              </p>
+              {product.sizes && product.sizes.length > 0 && (
+                <p className="text-gray-500 mb-2 text-sm">
+                  Sizes: {product.sizes.join(", ")}
+                </p>
+              )}
 
               {/* Action Buttons */}
               <div className="mt-auto flex gap-2">
