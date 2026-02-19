@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import axios from "@/lib/api/axios";
 import { Heart } from "lucide-react";
+import { toast } from "react-toastify";
 
 interface Product {
   _id: string;
@@ -21,7 +22,6 @@ export default function Page() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        // Fetch only club jerseys
         const res = await axios.get("/admin/products/?category=club");
         setProducts(res.data.data);
       } catch (err: any) {
@@ -46,15 +46,16 @@ export default function Page() {
       await axios.post(`/api/users/${user._id}/favourite`, {
         productId,
       });
-
-      // update local UI
       if (favourites.includes(productId)) {
         setFavourites(favourites.filter((id) => id !== productId));
+        toast.success("Removed from favourites");
       } else {
         setFavourites([...favourites, productId]);
+        toast.success("Added to favourites");
       }
     } catch (error) {
       console.error(error);
+      toast.error("Something went wrong!");
     }
   };
 
@@ -112,8 +113,8 @@ export default function Page() {
                   Rs. {product.price}
                 </p>
 
-                <button className="mt-4 w-full bg-purple-600 hover:bg-purple-800 py-2 rounded-md text-sm font-medium">
-                  View Jerseys
+                <button className="mt-4 w-full bg-purple-600 hover:bg-purple-800 py-2 rounded-md text-sm font-medium cursor-pointer">
+                  Add to Cart
                 </button>
               </div>
             );

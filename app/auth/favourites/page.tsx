@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "@/lib/api/axios";
 import { Heart } from "lucide-react";
+import { toast } from "react-toastify";
 
 interface Product {
   _id: string;
@@ -32,7 +33,6 @@ export default function FavouritePage() {
           return;
         }
 
-        // ⚠️ IMPORTANT: Adjust this depending on your axios baseURL
         const res = await axios.get(`/api/users/${user._id}/favourite`);
 
         setFavourites(res.data);
@@ -57,6 +57,7 @@ export default function FavouritePage() {
       setFavourites((prev) =>
         prev.filter((item) => item.product._id !== productId)
       );
+      toast.success("Removed from favourites");
     } catch (error) {
       console.error(error);
     }
@@ -93,9 +94,9 @@ export default function FavouritePage() {
                   {/* Remove Favourite */}
                   <button
                     onClick={() => removeFavourite(product._id)}
-                    className="absolute top-3 right-3"
+                    className="absolute top-3 right-3 pointer-cursor"
                   >
-                    <Heart className="w-6 h-6 fill-red-500 text-red-500" />
+                    <Heart className="w-6 h-6 fill-red-500 text-red-500 pointer-cursor" />
                   </button>
 
                   <img
@@ -118,8 +119,8 @@ export default function FavouritePage() {
                     Rs. {product.price}
                   </p>
 
-                  <button className="mt-4 w-full bg-purple-600 hover:bg-purple-800 py-2 rounded-md text-sm font-medium">
-                    View Jerseys
+                  <button className="mt-4 w-full bg-purple-600 hover:bg-purple-800 py-2 rounded-md text-sm font-medium pointer-cursor">
+                    Add to Cart
                   </button>
                 </div>
               );

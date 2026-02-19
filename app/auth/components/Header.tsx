@@ -58,7 +58,7 @@ export default function Header() {
           </Link>
 
           {/* Cart */}
-          <Link href="/cart" className="relative text-xl text-white">
+          <Link href="/auth/Cart" className="relative text-xl text-white">
             🛒
             <span className="absolute -top-2 -right-2 text-xs bg-purple-600 text-white rounded-full h-5 w-5 flex items-center justify-center">
               0

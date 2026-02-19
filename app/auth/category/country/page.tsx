@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import axios from "@/lib/api/axios";
 import { Heart } from "lucide-react";
+import { toast } from "react-toastify";
 
 interface Product {
   _id: string;
@@ -27,7 +28,6 @@ export default function Page() {
       ? JSON.parse(localStorage.getItem("user") || "null")
       : null;
 
-  // ✅ Fetch Products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -35,23 +35,23 @@ export default function Page() {
         setProducts(res.data.data);
       } catch (err) {
         console.error(err);
+        toast.error("Failed to fetch products");
       }
     };
 
     fetchProducts();
   }, []);
 
-  // ✅ Fetch Favourites from backend
   useEffect(() => {
     const fetchFavourites = async () => {
       if (!user?._id) return;
 
       try {
         const res = await axios.get(`/api/users/${user._id}/favourite`);
-
         setFavourites(res.data.favourites || []);
       } catch (error) {
         console.error("Failed to fetch favourites:", error);
+        toast.error("Failed to fetch favourites");
       } finally {
         setLoading(false);
       }
@@ -60,22 +60,25 @@ export default function Page() {
     fetchFavourites();
   }, [user?._id]);
 
-  // ✅ Toggle Favourite (backend + UI sync)
   const toggleFavourite = async (productId: string) => {
-    if (!user?._id) return;
+    if (!user?._id) {
+      toast.error("Please login first");
+      return;
+    }
 
     try {
-      await axios.post(`/api/users/${user._id}/favourite`, {
-        productId,
-      });
+      await axios.post(`/api/users/${user._id}/favourite`, { productId });
 
       if (favourites.includes(productId)) {
         setFavourites(favourites.filter((id) => id !== productId));
+        toast.success("Removed from favourites");
       } else {
         setFavourites([...favourites, productId]);
+        toast.success("Added to favourites");
       }
     } catch (error) {
       console.error("Failed to update favourite:", error);
+      toast.error("Something went wrong!");
     }
   };
 
@@ -102,6 +105,7 @@ export default function Page() {
                 key={product._id}
                 className="relative bg-gray-900 rounded-xl p-4 hover:scale-105 transition duration-300"
               >
+                {/* Favourite Icon */}
                 <button
                   onClick={() => toggleFavourite(product._id)}
                   className="absolute top-3 right-3"
@@ -133,8 +137,8 @@ export default function Page() {
                   Rs. {product.price}
                 </p>
 
-                <button className="mt-4 w-full bg-purple-600 hover:bg-purple-800 py-2 rounded-md text-sm font-medium">
-                  View Jerseys
+                <button className="mt-4 w-full bg-purple-600 hover:bg-purple-800 py-2 rounded-md text-sm font-medium cursor-pointer">
+                  Add to Cart
                 </button>
               </div>
             );
