@@ -46,7 +46,7 @@ export default function Page() {
 
       {/* TOP PICKS SECTION */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
-        <h2 className="text-2xl font-bold mb-8">🔥 Top Picks</h2>
+        <h2 className="text-2xl font-bold mb-8">Top Picks</h2>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div className="bg-gray-900 rounded-xl p-4 hover:scale-105 transition">

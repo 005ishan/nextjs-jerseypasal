@@ -1,22 +1,123 @@
-import JerseyCard from "../../components/JerseyCard";
+"use client";
+
+import { useState, useEffect } from "react";
+import axios from "@/lib/api/axios";
+import { Heart } from "lucide-react";
+
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  category: "club" | "country";
+  sizes?: string[];
+  imageUrl?: string;
+}
 
 export default function Page() {
-  const clubs = [
-    { id: 1, name: "Real Madrid", image: "/images/real-madrid.png" },
-    { id: 2, name: "Manchester United", image: "/images/manutd.png" },
-    { id: 3, name: "Barcelona", image: "/images/barcelona.png" },
-    { id: 4, name: "Bayern Munich", image: "/images/bayern.png" },
-  ];
+  const [products, setProducts] = useState<Product[]>([]);
+  const [favourites, setFavourites] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        // Fetch only club jerseys
+        const res = await axios.get("/admin/products/?category=club");
+        setProducts(res.data.data);
+      } catch (err: any) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const toggleFavourite = async (productId: string) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+      if (!user?._id) {
+        alert("Please login first");
+        return;
+      }
+
+      await axios.post(`/api/users/${user._id}/favourite`, {
+        productId,
+      });
+
+      // update local UI
+      if (favourites.includes(productId)) {
+        setFavourites(favourites.filter((id) => id !== productId));
+      } else {
+        setFavourites([...favourites, productId]);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  if (loading)
+    return <p className="text-center mt-10 text-white">Loading jerseys...</p>;
 
   return (
     <section className="bg-gray-950 min-h-screen text-white py-14">
-      <div className="max-w-7xl mx-auto px-4">
-        <h1 className="text-4xl font-bold mb-10">🏟 Club Jerseys</h1>
-
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <h1 className="text-4xl font-bold mb-10">Club Jerseys</h1>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {clubs.map((club) => (
-            <JerseyCard key={club.id} {...club} type="club" />
-          ))}
+          {products.map((product) => {
+            const imageUrl = product.imageUrl
+              ? product.imageUrl.startsWith("http")
+                ? product.imageUrl
+                : `${process.env.NEXT_PUBLIC_API_URL}${product.imageUrl}`
+              : "/images/no-image.png";
+
+            const isFav = favourites.includes(product._id);
+
+            return (
+              <div
+                key={product._id}
+                className="relative bg-gray-900 rounded-xl p-4 hover:scale-105 transition duration-300"
+              >
+                {/* Favourite Icon */}
+                <button
+                  onClick={() => toggleFavourite(product._id)}
+                  className="absolute top-3 right-3"
+                >
+                  <Heart
+                    className={`w-6 h-6 transition cursor-pointer ${
+                      isFav
+                        ? "fill-red-500 text-red-500"
+                        : "text-gray-400 hover:text-red-400"
+                    }`}
+                  />
+                </button>
+
+                <img
+                  src={imageUrl}
+                  alt={product.name}
+                  className="h-60 w-full object-cover rounded-lg"
+                />
+
+                <p className="mt-4 font-semibold text-center">{product.name}</p>
+
+                {product.sizes && product.sizes.length > 0 && (
+                  <p className="text-gray-300 text-sm text-center mt-1">
+                    Sizes: {product.sizes.join(", ")}
+                  </p>
+                )}
+
+                <p className="text-center mt-2 font-medium">
+                  Rs. {product.price}
+                </p>
+
+                <button className="mt-4 w-full bg-purple-600 hover:bg-purple-800 py-2 rounded-md text-sm font-medium">
+                  View Jerseys
+                </button>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

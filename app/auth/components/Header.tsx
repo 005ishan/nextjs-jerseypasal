@@ -53,8 +53,8 @@ export default function Header() {
           </div>
 
           {/* Favourites */}
-          <Link href="/auth/context/FavouriteContext" className="relative text-xl text-white">
-            ❤️
+          <Link href="/auth/favourites" className="relative text-xl text-white">
+            ❤︎
           </Link>
 
           {/* Cart */}
