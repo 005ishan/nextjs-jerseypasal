@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { usePathname } from "next/navigation";
 import axios from "@/lib/api/axios";
+import Image from "next/image";
 
 const NAV_LINKS = [
   { id: "home", label: "Home", href: "/auth/dashboard" },
