@@ -119,7 +119,7 @@ export default function FavouritePage() {
                     Rs. {product.price}
                   </p>
 
-                  <button className="mt-4 w-full bg-purple-600 hover:bg-purple-800 py-2 rounded-md text-sm font-medium pointer-cursor">
+                  <button className="mt-4 w-full bg-purple-600 hover:bg-purple-800 py-2 rounded-md text-sm font-medium cursor-pointer">
                     Add to Cart
                   </button>
                 </div>

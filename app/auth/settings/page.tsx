@@ -118,7 +118,7 @@ export default function SettingsPage() {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl font-semibold transition shadow-lg"
+            className="w-full bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl font-semibold transition shadow-lg cursor-pointer"
           >
             Update Settings
           </button>

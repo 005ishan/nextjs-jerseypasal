@@ -6,6 +6,9 @@ import { useAuth } from "@/context/AuthContext";
 import { usePathname } from "next/navigation";
 import axios from "@/lib/api/axios";
 import Image from "next/image";
+import { createPortal } from "react-dom";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 const NAV_LINKS = [
   { id: "home", label: "Home", href: "/auth/dashboard" },
@@ -29,10 +32,65 @@ interface FavouriteItem {
   _id: string;
 }
 
+function LogoutModal({
+  isOpen,
+  onClose,
+  onConfirm,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center">
+      {/* Background */}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      ></div>
+
+      {/* Modal */}
+      <div className="relative bg-gray-900 border border-gray-700 text-white rounded-xl p-6 w-80 shadow-2xl z-10">
+        <h3 className="text-lg font-semibold mb-3">Confirm Logout</h3>
+        <p className="text-sm text-gray-300 mb-6">
+          Are you sure you want to logout?
+        </p>
+
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-md bg-gray-700 hover:bg-gray-600 transition cursor-pointer"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 transition cursor-pointer"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
 export default function Header() {
   const { logout, user } = useAuth();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+  const router = useRouter();
 
   // Search
   const [searchQuery, setSearchQuery] = useState("");
@@ -89,7 +147,7 @@ export default function Header() {
     const delayDebounce = setTimeout(async () => {
       try {
         const res = await axios.get(
-          `/admin/products/search?query=${searchQuery}`
+          `/admin/products/search?query=${searchQuery}`,
         );
         setSuggestions(res.data.data || []);
         setShowSuggestions(true);
@@ -113,9 +171,19 @@ export default function Header() {
       }
     };
     document.addEventListener("click", handleClickOutside);
-    return () =>
-      document.removeEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
   }, []);
+  const handleLogout = () => {
+    try {
+      logout();
+      toast.success("Logged out successfully");
+      router.push("/login");
+    } catch {
+      toast.error("Failed to logout");
+    } finally {
+      setIsLogoutOpen(false);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-gray-950 border-b border-gray-800 backdrop-blur">
@@ -214,7 +282,7 @@ export default function Header() {
           <div className="hidden sm:flex items-center gap-3 text-sm text-white">
             <span className="opacity-80">{user?.email}</span>
             <button
-              onClick={logout}
+              onClick={() => setIsLogoutOpen(true)}
               className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded-md text-white transition cursor-pointer"
             >
               Logout
@@ -289,6 +357,11 @@ export default function Header() {
           </div>
         </div>
       )}
+      <LogoutModal
+        isOpen={isLogoutOpen}
+        onClose={() => setIsLogoutOpen(false)}
+        onConfirm={handleLogout}
+      />
     </header>
   );
 }

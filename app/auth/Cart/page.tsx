@@ -148,7 +148,7 @@ export default function Page() {
                 </div>
                 <button
                   onClick={() => removeItem(item.product._id, item.size)}
-                  className="text-sm bg-red-600 hover:bg-red-800 px-3 py-1 rounded-md"
+                  className="text-sm bg-red-600 hover:bg-red-800 px-3 py-1 rounded-md cursor-pointer"
                 >
                   Remove
                 </button>
@@ -162,16 +162,26 @@ export default function Page() {
           <div className="flex gap-4 justify-end mt-6">
             <button
               onClick={handleEsewaDemo}
-              className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg"
+              className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg flex items-center gap-2 cursor-pointer"
             >
-              Pay with eSewa
+              Pay with
+              <img
+                src="/icons/esewa.png"
+                alt="eSewa"
+                className="h-6 w-auto"
+              />
             </button>
 
             <button
               onClick={handleKhaltiDemo}
-              className="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg"
+              className="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg flex items-center gap-2 cursor-pointer"
             >
-              Pay with Khalti
+              Pay with 
+              <img
+                src="/icons/khalti.png"
+                alt="khalti"
+                className="h-6 w-auto"
+              />
             </button>
           </div>
         </>
