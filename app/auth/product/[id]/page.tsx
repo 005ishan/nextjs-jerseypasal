@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import axios from "@/lib/api/axios";
 import { useParams } from "next/navigation";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -13,24 +14,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState<string>("");
 
-  // =============================
-  // Image Safe Loader ⭐
-  // =============================
-  const getImageUrl = (imageUrl?: string) => {
-    if (!imageUrl) return "/images/no-image.png";
-
-    // If already absolute URL
-    if (imageUrl.startsWith("http")) return imageUrl;
-
-    // Remove duplicate slash bug
-    const base = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
-
-    return `${base}${imageUrl}`;
-  };
-
-  // =============================
   // Fetch Product
-  // =============================
   useEffect(() => {
     if (!productId) return;
 
@@ -49,9 +33,7 @@ export default function ProductDetailPage() {
     fetchProduct();
   }, [productId]);
 
-  // =============================
-  // Add To Cart Function
-  // =============================
+  // Add To Cart
   const addToCart = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "null");
@@ -66,36 +48,66 @@ export default function ProductDetailPage() {
         return;
       }
 
-      await axios.post(`/api/users/${user._id}/cart`, {
-        productId: product._id,
-        quantity: 1,
-        size: selectedSize,
-      });
+      if (!product?._id) {
+        toast.error("Product not loaded");
+        return;
+      }
 
-      toast.success("Added to cart 🛒");
+      const token = localStorage.getItem("token");
+
+      await axios.post(
+        `/api/users/${user._id}/cart`,
+        {
+          productId: product._id,
+          quantity: 1,
+          size: selectedSize,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      toast.success("Added to cart");
+
     } catch (error) {
       console.error(error);
       toast.error("Add to cart failed");
     }
   };
 
-  // =============================
   // Loading State
-  // =============================
   if (loading)
     return (
-      <div className="text-white text-center p-20">Loading product...</div>
+      <div className="text-white text-center p-20">
+        Loading product...
+      </div>
     );
 
   if (!product)
-    return <div className="text-white text-center p-20">Product not found</div>;
+    return (
+      <div className="text-white text-center p-20">
+        Product not found
+      </div>
+    );
 
-  // =============================
-  // Render UI
-  // =============================
+  // Image Safe Loader
+  const getImageUrl = (imageUrl?: string) => {
+    if (!imageUrl) return "/images/no-image.png";
+
+    if (imageUrl.startsWith("http")) return imageUrl;
+
+    const base = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
+
+    return `${base}${imageUrl}`;
+  };
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-12 text-white">
+
       <div className="grid md:grid-cols-2 gap-10 bg-gray-900 p-8 rounded-2xl shadow-xl">
+
         {/* Product Image */}
         <div className="relative w-full h-[400px]">
           <img
@@ -145,10 +157,14 @@ export default function ProductDetailPage() {
             onClick={addToCart}
             className="w-full bg-purple-600 hover:bg-purple-700 transition py-3 rounded-xl font-semibold cursor-pointer"
           >
-            Add to Cart 
+            Add to Cart
           </button>
         </div>
       </div>
+
+      {/* Toast Container */}
+      <ToastContainer position="top-right" autoClose={2000} />
+
     </div>
   );
 }

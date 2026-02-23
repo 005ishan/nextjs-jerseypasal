@@ -24,6 +24,28 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
 
+  const productNames = cart.map((item) => item.product.name).join(", ");
+
+  const handleEsewaDemo = () => {
+    localStorage.setItem("paymentMethod", "esewa");
+    localStorage.setItem("paymentAmount", total.toString());
+    localStorage.setItem("paymentProduct", productNames);
+
+    window.open("https://esewa.com.np", "_blank");
+
+    window.location.href = "/auth/payment-success";
+  };
+
+  const handleKhaltiDemo = () => {
+    localStorage.setItem("paymentMethod", "khalti");
+    localStorage.setItem("paymentAmount", total.toString());
+    localStorage.setItem("paymentProduct", productNames);
+
+    window.open("https://khalti.com", "_blank");
+
+    window.location.href = "/auth/payment-success";
+  };
+
   // Get user ID from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -67,7 +89,11 @@ export default function Page() {
         data: { productId, size },
       });
 
-      setCart(cart.filter((item) => !(item.product._id === productId && item.size === size)));
+      setCart(
+        cart.filter(
+          (item) => !(item.product._id === productId && item.size === size),
+        ),
+      );
       toast.success("Item removed from cart");
     } catch (error) {
       console.error("Failed to remove item", error);
@@ -77,7 +103,7 @@ export default function Page() {
 
   const total = cart.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
-    0
+    0,
   );
 
   if (loading) return <p className="p-6">Loading cart...</p>;
@@ -132,6 +158,21 @@ export default function Page() {
 
           <div className="text-right font-bold text-2xl mt-6 text-purple-500">
             Total: Rs. {total}
+          </div>
+          <div className="flex gap-4 justify-end mt-6">
+            <button
+              onClick={handleEsewaDemo}
+              className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg"
+            >
+              Pay with eSewa
+            </button>
+
+            <button
+              onClick={handleKhaltiDemo}
+              className="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg"
+            >
+              Pay with Khalti
+            </button>
           </div>
         </>
       )}
