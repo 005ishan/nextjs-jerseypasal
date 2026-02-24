@@ -36,7 +36,7 @@ export default function Sidebar() {
                     ? "bg-orange-500 text-white font-semibold"
                     : "text-gray-300 hover:bg-gray-800 hover:text-white"
                 }
-              `}
+              `}//
             >
               {item.name}
             </Link>
