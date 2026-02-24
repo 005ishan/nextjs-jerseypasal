@@ -10,6 +10,7 @@ export default function Sidebar() {
     { name: "Dashboard", href: "/admin" },
     { name: "Users", href: "/admin/users" },
     { name: "Jersey", href: "/admin/products" },
+    { name: "Transactions", href: "/admin/transactions" },
   ];
 
   return (
