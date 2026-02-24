@@ -5,53 +5,16 @@ import Link from "next/link";
 import axios from "@/lib/api/axios";
 import { Product } from "@/types/product.type";
 import { toast } from "react-toastify";
-
-function DeleteModal({
-  isOpen,
-  onClose,
-  onConfirm,
-  productName,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  productName: string;
-}) {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-96 shadow-lg">
-        <h3 className="text-xl font-semibold mb-4">Delete Product</h3>
-        <p className="mb-6">
-          Are you sure you want to delete <strong>{productName}</strong>?
-        </p>
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+import DeleteModal from "./DeleteModal";
+import SkeletonRow from "./SkeletonRow";
 
 export default function ProductTable() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   const fetchProducts = async () => {
     try {
@@ -76,8 +39,8 @@ export default function ProductTable() {
 
   const confirmDelete = async () => {
     if (!selectedProduct) return;
-
     try {
+      setDeletingId(selectedProduct._id);
       await axios.delete(`/admin/products/${selectedProduct._id}`);
       toast.success("Product deleted successfully");
       setProducts(products.filter((p) => p._id !== selectedProduct._id));
@@ -85,6 +48,7 @@ export default function ProductTable() {
       toast.error(error.response?.data?.message || "Failed to delete product");
     } finally {
       closeDeleteModal();
+      setDeletingId(null);
     }
   };
 
@@ -92,102 +56,224 @@ export default function ProductTable() {
     fetchProducts();
   }, []);
 
-  if (loading) return <p className="text-center mt-10">Loading products...</p>;
+  const filtered = products.filter(
+    (p) =>
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.category.toLowerCase().includes(search.toLowerCase()),
+  );
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
-            Jersey Management
-          </h1>
-          <p className="text-gray-500 text-sm mt-1">
-            Add, Delete, or Edit Jerseys available in the store.
-          </p>
-        </div>
-        <Link
-          href="/admin/products/create"
-          className="px-4 py-2 bg-primary text-white rounded hover:bg-gray-700"
-        >
-          Create Jersey
-        </Link>
-      </div>
+    <div className="p-6 space-y-6">
+      <style>{`
+        @keyframes shimmer {
+          100% { transform: translateX(200%); }
+        }
+        .shimmer::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          transform: translateX(-100%);
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+          animation: shimmer 1.6s infinite;
+        }
+      `}</style>
 
-      {/* Products Grid */}
-      <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {products.map((product) => {
-          const imageUrl = product.imageUrl
-            ? product.imageUrl.startsWith("http")
-              ? product.imageUrl
-              : `${process.env.NEXT_PUBLIC_API_URL}${product.imageUrl}`
-            : null;
-
-          return (
-            <div
-              key={product._id}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col"
-            >
-              {/* Product Image */}
-              <div className="w-full h-48 mb-4 bg-gray-100 rounded overflow-hidden">
-                {imageUrl ? (
-                  <img
-                    src={imageUrl}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    No Image
-                  </div>
-                )}
-              </div>
-
-              {/* Product Info */}
-              <h2 className="font-semibold text-lg mb-1">{product.name}</h2>
-              <p className="text-gray-700 mb-1">Rs. {product.price}</p>
-              <p className="text-gray-500 mb-1 text-sm">
-                Category: {product.category}
-              </p>
-              {product.sizes && product.sizes.length > 0 && (
-                <p className="text-gray-500 mb-2 text-sm">
-                  Sizes: {product.sizes.join(", ")}
-                </p>
-              )}
-
-              {/* Action Buttons */}
-              <div className="mt-auto flex gap-2">
-                <Link
-                  href={`/admin/products/${product._id}`}
-                  className="flex-1 px-3 py-1 bg-blue-900 text-white rounded hover:bg-blue-600 text-center"
-                >
-                  View
-                </Link>
-                <Link
-                  href={`/admin/products/${product._id}/edit`}
-                  className="flex-1 px-3 py-1 bg-gray-800 text-white rounded hover:bg-green-600 text-center"
-                >
-                  Edit
-                </Link>
-                <button
-                  onClick={() => openDeleteModal(product)}
-                  className="flex-1 px-3 py-1 bg-red-800 text-white rounded hover:bg-red-600 text-center"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Delete Modal */}
       <DeleteModal
         isOpen={isModalOpen}
         onClose={closeDeleteModal}
         onConfirm={confirmDelete}
         productName={selectedProduct?.name || ""}
       />
+
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Jersey Management
+          </h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            Add, edit or delete jerseys available in the store.
+          </p>
+        </div>
+        <Link
+          href="/admin/products/create"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:opacity-90 shadow-md transition"
+        >
+          <span className="text-lg leading-none">+</span>
+          Create Jersey
+        </Link>
+      </div>
+
+      {/* Stat bar */}
+      {!loading && (
+        <div className="flex items-center gap-6 text-sm text-muted-foreground">
+          <span>
+            <span className="font-bold text-foreground">{products.length}</span>{" "}
+            total jerseys
+          </span>
+          <span>
+            <span className="font-bold text-foreground">
+              {products.filter((p) => p.category === "club").length}
+            </span>{" "}
+            club
+          </span>
+          <span>
+            <span className="font-bold text-foreground">
+              {products.filter((p) => p.category === "country").length}
+            </span>{" "}
+            country
+          </span>
+        </div>
+      )}
+
+      {/* Search */}
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by name or category..."
+          className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition bg-background"
+        />
+      </div>
+
+      {/* Table */}
+      <div className="rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+        <table className="w-full table-auto">
+          <thead>
+            <tr className="bg-gray-50 border-b border-gray-200">
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                #
+              </th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Image
+              </th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Name
+              </th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Price
+              </th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Category
+              </th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Sizes
+              </th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100 bg-background">
+            {loading ? (
+              Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
+            ) : filtered.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="px-5 py-16 text-center">
+                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                    <span className="text-4xl">👕</span>
+                    <p className="text-sm">No jerseys found.</p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              filtered.map((product, index) => {
+                const imageUrl = product.imageUrl
+                  ? product.imageUrl.startsWith("http")
+                    ? product.imageUrl
+                    : `${process.env.NEXT_PUBLIC_API_URL}${product.imageUrl}`
+                  : null;
+
+                return (
+                  <tr
+                    key={product._id}
+                    className={`hover:bg-gray-50 transition ${
+                      deletingId === product._id ? "opacity-40" : ""
+                    }`}
+                  >
+                    {/* # */}
+                    <td className="px-5 py-3.5 text-sm text-muted-foreground">
+                      {index + 1}
+                    </td>
+
+                    {/* Image */}
+                    <td className="px-5 py-3.5">
+                      {imageUrl ? (
+                        <img
+                          src={imageUrl}
+                          alt={product.name}
+                          className="w-12 h-12 rounded-xl object-cover border border-gray-100"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-xs text-gray-400">
+                          N/A
+                        </div>
+                      )}
+                    </td>
+
+                    {/* Name */}
+                    <td className="px-5 py-3.5 text-sm font-medium text-gray-800">
+                      {product.name}
+                    </td>
+
+                    {/* Price */}
+                    <td className="px-5 py-3.5 text-sm font-semibold text-primary">
+                      Rs. {product.price}
+                    </td>
+
+                    {/* Category */}
+                    <td className="px-5 py-3.5">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${
+                          product.category === "club"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-green-100 text-green-700"
+                        }`}
+                      >
+                        {product.category}
+                      </span>
+                    </td>
+
+                    {/* Sizes */}
+                    <td className="px-5 py-3.5 text-sm text-gray-500">
+                      {product.sizes && product.sizes.length > 0 ? (
+                        product.sizes.join(", ")
+                      ) : (
+                        <span className="text-gray-300">—</span>
+                      )}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/admin/products/${product._id}`}
+                          className="px-3 py-1.5 text-xs font-medium rounded-lg bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 transition"
+                        >
+                          View
+                        </Link>
+                        <Link
+                          href={`/admin/products/${product._id}/edit`}
+                          className="px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition"
+                        >
+                          Edit
+                        </Link>
+                        <button
+                          onClick={() => openDeleteModal(product)}
+                          className="px-3 py-1.5 text-xs font-medium rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition cursor-pointer"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

@@ -14,7 +14,6 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState<string>("");
 
-  // Fetch Product
   useEffect(() => {
     if (!productId) return;
 
@@ -33,7 +32,6 @@ export default function ProductDetailPage() {
     fetchProduct();
   }, [productId]);
 
-  // Add To Cart
   const addToCart = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "null");
@@ -57,49 +55,27 @@ export default function ProductDetailPage() {
 
       await axios.post(
         `/api/users/${user._id}/cart`,
-        {
-          productId: product._id,
-          quantity: 1,
-          size: selectedSize,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { productId: product._id, quantity: 1, size: selectedSize },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      toast.success("Added to cart");
-
+      toast.success("Added to cart 🛒");
     } catch (error) {
       console.error(error);
       toast.error("Add to cart failed");
     }
   };
 
-  // Loading State
   if (loading)
-    return (
-      <div className="text-white text-center p-20">
-        Loading product...
-      </div>
-    );
+    return <div className="text-white text-center p-20">Loading product...</div>;
 
   if (!product)
-    return (
-      <div className="text-white text-center p-20">
-        Product not found
-      </div>
-    );
+    return <div className="text-white text-center p-20">Product not found</div>;
 
-  // Image Safe Loader
   const getImageUrl = (imageUrl?: string) => {
     if (!imageUrl) return "/images/no-image.png";
-
     if (imageUrl.startsWith("http")) return imageUrl;
-
     const base = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
-
     return `${base}${imageUrl}`;
   };
 
@@ -108,7 +84,6 @@ export default function ProductDetailPage() {
 
       <div className="grid md:grid-cols-2 gap-10 bg-gray-900 p-8 rounded-2xl shadow-xl">
 
-        {/* Product Image */}
         <div className="relative w-full h-[400px]">
           <img
             src={getImageUrl(product.imageUrl)}
@@ -117,7 +92,6 @@ export default function ProductDetailPage() {
           />
         </div>
 
-        {/* Product Info */}
         <div className="space-y-6">
           <h1 className="text-4xl font-bold">{product.name}</h1>
 
@@ -129,11 +103,9 @@ export default function ProductDetailPage() {
             Category : {product.category}
           </div>
 
-          {/* Size Selector */}
           {product.sizes?.length > 0 && (
             <div>
               <h3 className="mb-3 text-lg font-medium">Select Size</h3>
-
               <div className="flex flex-wrap gap-3">
                 {product.sizes.map((size: string) => (
                   <button
@@ -152,7 +124,6 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          {/* Add Cart Button */}
           <button
             onClick={addToCart}
             className="w-full bg-purple-600 hover:bg-purple-700 transition py-3 rounded-xl font-semibold cursor-pointer"
@@ -162,8 +133,21 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
-      {/* Toast Container */}
-      <ToastContainer position="top-right" autoClose={2000} />
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        theme="dark"
+        toastStyle={{
+          backgroundColor: "#1f1f2e",
+          color: "#fff",
+          border: "1px solid #7c3aed",
+          borderRadius: "12px",
+        }}
+      />
 
     </div>
   );
