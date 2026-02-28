@@ -14,6 +14,7 @@ const NAV_LINKS = [
   { id: "home", label: "Home", href: "/auth/dashboard" },
   { id: "country", label: "Country", href: "/auth/category/country" },
   { id: "clubs", label: "Clubs", href: "/auth/category/clubs" },
+  { id: "orders", label: "Orders", href: "/auth/orders" },
   { id: "settings", label: "Settings", href: "/auth/settings" },
 ];
 
@@ -173,6 +174,7 @@ export default function Header() {
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
+
   const handleLogout = () => {
     try {
       logout();

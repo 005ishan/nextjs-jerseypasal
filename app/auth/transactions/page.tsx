@@ -42,7 +42,7 @@ export default function Page() {
         const parsed = JSON.parse(user);
         const res = await axios.get(
           `http://localhost:5050/api/transactions/${parsed._id}`,
-          { headers: { Authorization: token || "" } },
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         setTransactions(res.data || []);
       } catch (error) {
@@ -76,13 +76,6 @@ export default function Page() {
       `}</style>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Back */}
-        <button
-          onClick={() => router.back()}
-          className="mb-8 flex items-center gap-2 text-gray-500 hover:text-white transition cursor-pointer text-sm"
-        >
-          ← Back
-        </button>
 
         {/* Header */}
         <div className="flex items-center justify-between mb-10">

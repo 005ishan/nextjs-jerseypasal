@@ -10,12 +10,13 @@ export default function Sidebar() {
     { name: "Dashboard", href: "/admin" },
     { name: "Users", href: "/admin/users" },
     { name: "Jersey", href: "/admin/products" },
+    { name: "Orders", href: "/admin/orders" }, 
     { name: "Transactions", href: "/admin/transactions" },
   ];
 
   return (
     <aside className="fixed top-0 left-0 h-screen w-64 bg-gray-900 text-white hidden md:flex flex-col shadow-lg z-50">
-      
+
       {/* Logo / Header */}
       <div className="p-6 text-2xl font-bold tracking-tight text-orange-500 border-b border-gray-800">
         Jerseyपसल Admin
@@ -37,7 +38,7 @@ export default function Sidebar() {
                     ? "bg-orange-500 text-white font-semibold"
                     : "text-gray-300 hover:bg-gray-800 hover:text-white"
                 }
-              `}//
+              `}
             >
               {item.name}
             </Link>
