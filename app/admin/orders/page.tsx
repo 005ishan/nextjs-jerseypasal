@@ -1,8 +1,17 @@
 "use client";
-// app/admin/orders/page.tsx
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import {
+  Package,
+  User,
+  DollarSign,
+  Calendar,
+  Hash,
+  RefreshCw,
+  Download,
+  ShoppingBag,
+} from "lucide-react";
 
 type OrderStatus = "pending" | "processing" | "shipped" | "delivered";
 
@@ -24,39 +33,32 @@ type Order = {
 
 const STATUS_FLOW: OrderStatus[] = ["pending", "processing", "shipped", "delivered"];
 
-const STATUS_STYLES: Record<OrderStatus, { badge: string; dot: string; label: string }> = {
-  pending:    { badge: "bg-amber-500/10 border-amber-500/20 text-amber-400",   dot: "bg-amber-400",   label: "Pending"    },
-  processing: { badge: "bg-blue-500/10 border-blue-500/20 text-blue-400",      dot: "bg-blue-400",    label: "Processing" },
-  shipped:    { badge: "bg-violet-500/10 border-violet-500/20 text-violet-400",dot: "bg-violet-400",  label: "Shipped"    },
-  delivered:  { badge: "bg-green-500/10 border-green-500/20 text-green-400",   dot: "bg-green-400",   label: "Delivered"  },
+const STATUS_STYLES: Record<OrderStatus, { badge: string; label: string; dot: string }> = {
+  pending:    { badge: "bg-amber-100 text-amber-700 border-amber-200",   dot: "bg-amber-400",  label: "Pending"    },
+  processing: { badge: "bg-blue-100 text-blue-700 border-blue-200",      dot: "bg-blue-500",   label: "Processing" },
+  shipped:    { badge: "bg-violet-100 text-violet-700 border-violet-200",dot: "bg-violet-500", label: "Shipped"    },
+  delivered:  { badge: "bg-green-100 text-green-700 border-green-200",   dot: "bg-green-500",  label: "Delivered"  },
 };
 
-function SkeletonRow() {
-  return (
-    <div className="relative bg-gray-900 border border-gray-800 rounded-2xl p-5 overflow-hidden">
-      <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-      <div className="flex justify-between items-center gap-4">
-        <div className="space-y-2 flex-1">
-          <div className="h-4 bg-gray-800 rounded-full w-1/3" />
-          <div className="h-3 bg-gray-800 rounded-full w-1/2" />
-        </div>
-        <div className="h-8 bg-gray-800 rounded-lg w-28" />
-      </div>
-    </div>
-  );
-}
+const STATUS_COUNT_BG: Record<OrderStatus, string> = {
+  pending:    "bg-amber-100",
+  processing: "bg-blue-100",
+  shipped:    "bg-violet-100",
+  delivered:  "bg-green-100",
+};
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+  useEffect(() => { fetchOrders(); }, []);
 
-  async function fetchOrders() {
+  async function fetchOrders(showRefresh = false) {
+    if (showRefresh) setRefreshing(true);
+    else setLoading(true);
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get("http://localhost:5050/api/admin/orders", {
@@ -67,6 +69,7 @@ export default function AdminOrdersPage() {
       console.error("Failed to fetch orders");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }
 
@@ -77,7 +80,7 @@ export default function AdminOrdersPage() {
       await axios.patch(
         `http://localhost:5050/api/admin/orders/${orderId}/status`,
         { status: newStatus },
-        { headers: { Authorization: token || "" } }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       setOrders((prev) =>
         prev.map((o) => (o._id === orderId ? { ...o, status: newStatus } : o))
@@ -89,142 +92,228 @@ export default function AdminOrdersPage() {
     }
   }
 
+  function downloadCSV() {
+    const headers = ["#", "Transaction ID", "Customer", "Items", "Amount (Rs)", "Status", "Date"];
+    const rows = orders.map((order, i) => {
+      const email = typeof order.userId === "object" ? order.userId.email : order.userId;
+      const items = order.items.map((it) => `${it.productName} (${it.size}) x${it.quantity}`).join(" | ");
+      return [
+        i + 1,
+        order.transactionId?.slice(-8).toUpperCase() || order._id.slice(-8),
+        email,
+        `"${items}"`,
+        order.totalAmount,
+        order.status,
+        new Date(order.createdAt).toLocaleString(),
+      ].join(",");
+    });
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   const counts = STATUS_FLOW.reduce((acc, s) => {
     acc[s] = orders.filter((o) => o.status === s).length;
     return acc;
   }, {} as Record<OrderStatus, number>);
 
+  const totalAmount = orders.reduce((sum, o) => sum + o.totalAmount, 0);
   const filtered = filter === "all" ? orders : orders.filter((o) => o.status === filter);
 
+  const formatDate = (d: string) =>
+    new Intl.DateTimeFormat("en-US", {
+      year: "numeric", month: "short", day: "numeric",
+      hour: "2-digit", minute: "2-digit",
+    }).format(new Date(d));
+
   return (
-    <div className="bg-gray-950 min-h-screen text-white py-10 px-6">
-      <style>{`@keyframes shimmer { 100% { transform: translateX(100%); } }`}</style>
-
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold">Orders</h1>
-        <p className="text-gray-500 text-sm mt-1">
-          {!loading && `${orders.length} total order${orders.length !== 1 ? "s" : ""}`}
-        </p>
-      </div>
-
-      {/* Status Filter Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-        {STATUS_FLOW.map((s) => {
-          const style = STATUS_STYLES[s];
-          const active = filter === s;
-          return (
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg">
+              <ShoppingBag className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-gray-800">Orders</h1>
+              <p className="text-xs text-gray-500">Manage and update jersey order statuses</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
             <button
-              key={s}
-              onClick={() => setFilter(filter === s ? "all" : s)}
-              className={`rounded-2xl p-4 border text-left transition-all ${
-                active
-                  ? "border-orange-500/40 bg-orange-500/10"
-                  : "border-gray-800 bg-gray-900 hover:border-gray-700"
-              }`}
+              onClick={() => fetchOrders(true)}
+              title="Refresh"
+              className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition cursor-pointer"
             >
-              <div className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full border mb-2 ${style.badge}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
-                {style.label}
-              </div>
-              <p className="text-2xl font-bold">{counts[s]}</p>
+              <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
             </button>
-          );
-        })}
+            <button
+              onClick={downloadCSV}
+              title="Download CSV"
+              className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition cursor-pointer"
+            >
+              <Download className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Orders List */}
-      {loading ? (
-        <div className="space-y-4">
-          {Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)}
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-32 gap-3 text-center">
-          <div className="text-6xl">📦</div>
-          <p className="text-2xl font-bold text-gray-500">No orders found</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {filtered.map((order, index) => {
-            const style = STATUS_STYLES[order.status];
-            const currentIdx = STATUS_FLOW.indexOf(order.status);
-            const nextStatus = STATUS_FLOW[currentIdx + 1] ?? null;
-            const isUpdating = updating === order._id;
-            const email =
-              typeof order.userId === "object" ? order.userId.email : order.userId;
-
-            return (
-              <div
-                key={order._id}
-                className="bg-gray-900 border border-gray-800 hover:border-orange-800/50 rounded-2xl p-5 transition-all hover:shadow-[0_0_20px_rgba(249,115,22,0.06)]"
-              >
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  {/* Left info */}
-                  <div className="flex items-start gap-4">
-                    <div className="w-9 h-9 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-xs text-gray-500 font-bold shrink-0">
-                      {index + 1}
-                    </div>
-                    <div>
-                      <p className="font-bold text-sm text-orange-400 uppercase tracking-wide">
-                        {email}
-                      </p>
-                      <p className="text-gray-400 text-xs mt-0.5">
-                        {order.items.map((i) => `${i.productName} (${i.size}) x${i.quantity}`).join(", ")}
-                      </p>
-                      <div className="flex items-center gap-3 mt-2">
-                        <p className="text-gray-600 text-xs">
-                          {new Date(order.createdAt).toLocaleString()}
-                        </p>
-                        <span className="text-gray-700 text-xs">•</span>
-                        <p className="text-gray-600 text-xs font-mono">
-                          #{order.transactionId?.slice(-8).toUpperCase()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right: amount + status + actions */}
-                  <div className="flex flex-col md:flex-row items-start md:items-center gap-3 shrink-0">
-                    <p className="text-lg font-bold text-green-400">
-                      Rs. {order.totalAmount}
-                    </p>
-
-                    <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border ${style.badge}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
-                      {style.label}
-                    </span>
-
-                    {/* Advance to next status */}
-                    {nextStatus && (
-                      <button
-                        disabled={isUpdating}
-                        onClick={() => updateStatus(order._id, nextStatus)}
-                        className="text-xs px-3 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-400 disabled:opacity-50 transition-colors font-semibold text-white"
-                      >
-                        {isUpdating ? "..." : `→ ${STATUS_STYLES[nextStatus].label}`}
-                      </button>
-                    )}
-
-                    {/* Manual override dropdown */}
-                    <select
-                      value={order.status}
-                      disabled={isUpdating}
-                      onChange={(e) => updateStatus(order._id, e.target.value as OrderStatus)}
-                      className="text-xs bg-gray-800 border border-gray-700 rounded-lg px-2 py-1.5 text-gray-300 disabled:opacity-50 cursor-pointer"
-                    >
-                      {STATUS_FLOW.map((s) => (
-                        <option key={s} value={s} className="bg-gray-900">
-                          {STATUS_STYLES[s].label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
+      {/* Stats */}
+      <div className="px-6 py-4 grid grid-cols-2 md:grid-cols-5 gap-4">
+        {STATUS_FLOW.map((s) => (
+          <button
+            key={s}
+            onClick={() => setFilter(filter === s ? "all" : s)}
+            className={`bg-white rounded-xl p-4 shadow-sm border text-left transition-all cursor-pointer ${
+              filter === s ? "border-orange-400 ring-2 ring-orange-100" : "border-gray-100 hover:border-gray-200"
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wide">{STATUS_STYLES[s].label}</p>
+                <p className="text-2xl font-bold text-gray-800 mt-1">{counts[s]}</p>
               </div>
-            );
-          })}
+              <div className={`p-3 rounded-lg ${STATUS_COUNT_BG[s]}`}>
+                <span className={`w-3 h-3 rounded-full block ${STATUS_STYLES[s].dot}`} />
+              </div>
+            </div>
+          </button>
+        ))}
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-gray-500 uppercase tracking-wide">Total Value</p>
+              <p className="text-2xl font-bold text-gray-800 mt-1">Rs. {totalAmount.toLocaleString()}</p>
+            </div>
+            <div className="p-3 bg-green-100 rounded-lg">
+              <DollarSign className="w-5 h-5 text-green-600" />
+            </div>
+          </div>
         </div>
-      )}
+      </div>
+
+      {/* Table */}
+      <div className="px-6 pb-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  {["S.N.", "Transaction ID", "Customer", "Items", "Amount", "Status", "Date", "Actions"].map((h) => (
+                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {loading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i} className="animate-pulse">
+                      {Array.from({ length: 8 }).map((_, j) => (
+                        <td key={j} className="px-4 py-3">
+                          <div className="h-4 bg-gray-100 rounded-full w-3/4" />
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                ) : filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="px-4 py-12 text-center">
+                      <div className="flex flex-col items-center">
+                        <Package className="w-12 h-12 text-gray-300 mb-3" />
+                        <p className="text-gray-500 text-sm">No orders found</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map((order, index) => {
+                    const style = STATUS_STYLES[order.status];
+                    const currentIdx = STATUS_FLOW.indexOf(order.status);
+                    const nextStatus = STATUS_FLOW[currentIdx + 1] ?? null;
+                    const isUpdating = updating === order._id;
+                    const email = typeof order.userId === "object" ? order.userId.email : order.userId;
+
+                    return (
+                      <tr key={order._id} className="hover:bg-gray-50 transition">
+                        <td className="px-4 py-3 text-sm text-gray-500">{index + 1}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <Hash className="w-3 h-3 text-gray-400" />
+                            <span className="text-xs font-mono bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                              {order.transactionId?.slice(-8).toUpperCase() || order._id.slice(-8)}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <User className="w-4 h-4 text-gray-400" />
+                            <span className="text-xs text-gray-600">{email}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <Package className="w-4 h-4 text-gray-400 shrink-0" />
+                            <span className="text-xs text-gray-700 max-w-[180px] truncate">
+                              {order.items.map((i) => `${i.productName} (${i.size}) x${i.quantity}`).join(", ")}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="text-sm font-semibold text-green-600">
+                            Rs. {order.totalAmount.toLocaleString()}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium border ${style.badge}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
+                            {style.label}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-gray-400" />
+                            <span className="text-xs text-gray-600">{formatDate(order.createdAt)}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            {nextStatus && (
+                              <button
+                                disabled={isUpdating}
+                                onClick={() => updateStatus(order._id, nextStatus)}
+                                className="text-xs px-3 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-400 disabled:opacity-50 transition font-semibold text-white cursor-pointer whitespace-nowrap"
+                              >
+                                {isUpdating ? "..." : `→ ${STATUS_STYLES[nextStatus].label}`}
+                              </button>
+                            )}
+                            <select
+                              value={order.status}
+                              disabled={isUpdating}
+                              onChange={(e) => updateStatus(order._id, e.target.value as OrderStatus)}
+                              className="text-xs bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 disabled:opacity-50 cursor-pointer"
+                            >
+                              {STATUS_FLOW.map((s) => (
+                                <option key={s} value={s}>{STATUS_STYLES[s].label}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

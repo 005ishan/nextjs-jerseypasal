@@ -81,7 +81,7 @@ export default function Page() {
         toast.success("Removed from favourites");
       } else {
         setFavourites([...favourites, productId]);
-        toast.success("Added to favourites ❤️");
+        toast.success("Added to favourites");
       }
     } catch (error) {
       console.error("Failed to update favourite:", error);
@@ -165,7 +165,7 @@ export default function Page() {
 
                     {product.sizes && product.sizes.length > 0 && (
                       <select
-                        className="mt-3 w-full bg-gray-800 p-2 rounded text-sm"
+                        className="mt-3 w-full bg-gray-800 p-2 rounded text-sm cursor-pointer"
                         onChange={(e) => setSelectedSizes({ ...selectedSizes, [product._id]: e.target.value })}
                         defaultValue=""
                       >
@@ -180,7 +180,7 @@ export default function Page() {
 
                     <button
                       onClick={() => addToCart(product._id)}
-                      className="mt-4 w-full bg-purple-600 hover:bg-purple-800 py-2 rounded-md text-sm font-medium"
+                      className="mt-4 w-full bg-purple-600 hover:bg-purple-800 py-2 rounded-md text-sm font-medium cursor-pointer"
                     >
                       Add to Cart
                     </button>

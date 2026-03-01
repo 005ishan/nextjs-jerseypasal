@@ -319,7 +319,7 @@ export default function ProductTable() {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="font-bold text-lg text-gray-800">₹{product.price}</span>
+                          <span className="font-bold text-lg text-gray-800">Rs{product.price}</span>
                         </td>
                         <td className="px-6 py-4">
                           <span

@@ -191,7 +191,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full bg-gray-950 border-b border-gray-800 backdrop-blur">
       <div className="mx-auto max-w-7xl flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
         {/* Logo */}
-        <Link href="/" className="text-2xl font-bold text-white tracking-wide">
+        <Link href="/auth/dashboard" className="text-2xl font-bold text-white tracking-wide">
           JERSEY<span className="text-purple-500">पसल</span>
         </Link>
 
@@ -350,8 +350,11 @@ export default function Header() {
             <div className="pt-6 border-t border-gray-700">
               <p className="text-sm mb-2 opacity-70">{user?.email}</p>
               <button
-                onClick={logout}
-                className="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded-md"
+                onClick={() => {
+                  setMobileOpen(false);
+                  setIsLogoutOpen(true);
+                }}
+                className="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded-md cursor-pointer"
               >
                 Logout
               </button>

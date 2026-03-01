@@ -1,8 +1,8 @@
 import { handleGetAllTransactions } from "@/lib/actions/admin/transaction-actions";
-import { 
-  CreditCard, 
-  Package, 
-  User, 
+import {
+  CreditCard,
+  Package,
+  User,
   DollarSign,
   Calendar,
   Hash,
@@ -11,7 +11,7 @@ import {
   Search,
   Filter,
   Download,
-  RefreshCw
+  RefreshCw,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -34,17 +34,20 @@ export default async function TransactionsPage({
   }
 
   const transactions = response.data || [];
-  const totalAmount = transactions.reduce((sum: number, t: any) => sum + (t.amount || 0), 0);
+  const totalAmount = transactions.reduce(
+    (sum: number, t: any) => sum + (t.amount || 0),
+    0,
+  );
 
   // Format date function
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(date);
   };
 
@@ -54,9 +57,12 @@ export default async function TransactionsPage({
       esewa: "bg-purple-100 text-purple-700 border-purple-200",
       khalti: "bg-blue-100 text-blue-700 border-blue-200",
       cod: "bg-green-100 text-green-700 border-green-200",
-      card: "bg-orange-100 text-orange-700 border-orange-200"
+      card: "bg-orange-100 text-orange-700 border-orange-200",
     };
-    return colors[method?.toLowerCase()] || "bg-gray-100 text-gray-700 border-gray-200";
+    return (
+      colors[method?.toLowerCase()] ||
+      "bg-gray-100 text-gray-700 border-gray-200"
+    );
   };
 
   return (
@@ -70,11 +76,15 @@ export default async function TransactionsPage({
                 <CreditCard className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-800">Transactions</h1>
-                <p className="text-xs text-gray-500">Manage and view all payment transactions</p>
+                <h1 className="text-xl font-bold text-gray-800">
+                  Transactions
+                </h1>
+                <p className="text-xs text-gray-500">
+                  Manage and view all payment transactions
+                </p>
               </div>
             </div>
-            
+
             {/* Action Buttons */}
             <div className="flex items-center gap-2">
               <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition">
@@ -94,8 +104,12 @@ export default async function TransactionsPage({
           <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-500 uppercase">Total Transactions</p>
-                <p className="text-2xl font-bold text-gray-800 mt-1">{response.pagination?.total || 0}</p>
+                <p className="text-xs text-gray-500 uppercase">
+                  Total Transactions
+                </p>
+                <p className="text-2xl font-bold text-gray-800 mt-1">
+                  {response.pagination?.total || 0}
+                </p>
               </div>
               <div className="p-3 bg-purple-100 rounded-lg">
                 <CreditCard className="w-5 h-5 text-purple-600" />
@@ -107,7 +121,9 @@ export default async function TransactionsPage({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-500 uppercase">Total Amount</p>
-                <p className="text-2xl font-bold text-gray-800 mt-1">Rs. {totalAmount.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-gray-800 mt-1">
+                  Rs. {totalAmount.toLocaleString()}
+                </p>
               </div>
               <div className="p-3 bg-green-100 rounded-lg">
                 <DollarSign className="w-5 h-5 text-green-600" />
@@ -168,14 +184,27 @@ export default async function TransactionsPage({
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">S.N.</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Transaction ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Product</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">User ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Payment Method</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    S.N.
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Transaction ID
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Product
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    User ID
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Payment Method
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Date
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -184,14 +213,21 @@ export default async function TransactionsPage({
                     <td colSpan={8} className="px-4 py-12 text-center">
                       <div className="flex flex-col items-center justify-center">
                         <CreditCard className="w-12 h-12 text-gray-300 mb-3" />
-                        <p className="text-gray-500 text-sm">No transactions found</p>
-                        <p className="text-xs text-gray-400 mt-1">Try adjusting your search or filter</p>
+                        <p className="text-gray-500 text-sm">
+                          No transactions found
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          Try adjusting your search or filter
+                        </p>
                       </div>
                     </td>
                   </tr>
                 ) : (
                   transactions.map((transaction: any, index: number) => (
-                    <tr key={transaction._id} className="hover:bg-gray-50 transition">
+                    <tr
+                      key={transaction._id}
+                      className="hover:bg-gray-50 transition"
+                    >
                       <td className="px-4 py-3 text-sm text-gray-500">
                         {(parseInt(page) - 1) * parseInt(size) + index + 1}
                       </td>
@@ -199,7 +235,8 @@ export default async function TransactionsPage({
                         <div className="flex items-center gap-2">
                           <Hash className="w-3 h-3 text-gray-400" />
                           <span className="text-xs font-mono bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                            {transaction.transactionId?.slice(-8) || transaction._id?.slice(-8)}
+                            {transaction.transactionId?.slice(-8) ||
+                              transaction._id?.slice(-8)}
                           </span>
                         </div>
                       </td>
@@ -207,7 +244,7 @@ export default async function TransactionsPage({
                         <div className="flex items-center gap-2">
                           <Package className="w-4 h-4 text-gray-400" />
                           <span className="text-sm font-medium text-gray-800">
-                            {transaction.productName || 'N/A'}
+                            {transaction.productName || "N/A"}
                           </span>
                         </div>
                       </td>
@@ -225,7 +262,11 @@ export default async function TransactionsPage({
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getPaymentMethodColor(transaction.paymentMethod)}`}>
+                        <span
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getPaymentMethodColor(
+                            transaction.paymentMethod,
+                          )}`}
+                        >
                           <CreditCard className="w-3 h-3 mr-1" />
                           {transaction.paymentMethod?.toUpperCase()}
                         </span>
@@ -237,14 +278,6 @@ export default async function TransactionsPage({
                             {formatDate(transaction.createdAt)}
                           </span>
                         </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Link
-                          href={`/admin/transactions/${transaction._id}`}
-                          className="text-purple-600 hover:text-purple-700 text-sm font-medium"
-                        >
-                          View
-                        </Link>
                       </td>
                     </tr>
                   ))
@@ -258,17 +291,22 @@ export default async function TransactionsPage({
             <div className="px-4 py-3 border-t border-gray-200 bg-gray-50/50">
               <div className="flex items-center justify-between">
                 <p className="text-xs text-gray-500">
-                  Showing {(parseInt(page) - 1) * parseInt(size) + 1} to{' '}
-                  {Math.min(parseInt(page) * parseInt(size), response.pagination.total)} of{' '}
-                  {response.pagination.total} results
+                  Showing {(parseInt(page) - 1) * parseInt(size) + 1} to{" "}
+                  {Math.min(
+                    parseInt(page) * parseInt(size),
+                    response.pagination.total,
+                  )}{" "}
+                  of {response.pagination.total} results
                 </p>
                 <div className="flex items-center gap-2">
                   <Link
-                    href={`/admin/transactions?page=${parseInt(page) - 1}&size=${size}${search ? `&search=${search}` : ''}`}
+                    href={`/admin/transactions?page=${
+                      parseInt(page) - 1
+                    }&size=${size}${search ? `&search=${search}` : ""}`}
                     className={`p-2 rounded-lg border border-gray-200 ${
-                      parseInt(page) <= 1 
-                        ? 'opacity-40 cursor-not-allowed pointer-events-none bg-gray-50' 
-                        : 'hover:bg-white hover:border-gray-300 transition'
+                      parseInt(page) <= 1
+                        ? "opacity-40 cursor-not-allowed pointer-events-none bg-gray-50"
+                        : "hover:bg-white hover:border-gray-300 transition"
                     }`}
                   >
                     <ArrowLeft className="w-4 h-4" />
@@ -277,11 +315,13 @@ export default async function TransactionsPage({
                     {page}
                   </span>
                   <Link
-                    href={`/admin/transactions?page=${parseInt(page) + 1}&size=${size}${search ? `&search=${search}` : ''}`}
+                    href={`/admin/transactions?page=${
+                      parseInt(page) + 1
+                    }&size=${size}${search ? `&search=${search}` : ""}`}
                     className={`p-2 rounded-lg border border-gray-200 ${
-                      parseInt(page) >= response.pagination.totalPages 
-                        ? 'opacity-40 cursor-not-allowed pointer-events-none bg-gray-50' 
-                        : 'hover:bg-white hover:border-gray-300 transition'
+                      parseInt(page) >= response.pagination.totalPages
+                        ? "opacity-40 cursor-not-allowed pointer-events-none bg-gray-50"
+                        : "hover:bg-white hover:border-gray-300 transition"
                     }`}
                   >
                     <ArrowRight className="w-4 h-4" />
