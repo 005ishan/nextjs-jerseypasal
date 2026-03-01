@@ -30,7 +30,7 @@ export async function proxy(request: NextRequest) {
   if (token && user) {
     // Admin trying to access user route
     if (isUserRoute && user.role !== "user") {
-      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+      return NextResponse.redirect(new URL("/admin", request.url));
     }
 
     // User trying to access admin route
