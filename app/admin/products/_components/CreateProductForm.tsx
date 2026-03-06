@@ -3,12 +3,15 @@
 import axios from "@/lib/api/axios";
 import { useState, useRef } from "react";
 import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface Product {
   _id: string;
   name: string;
   price: number;
   imageUrl?: string;
+  category: "club" | "country";
+  sizes?: string[];
 }
 
 interface CreateProductFormProps {
@@ -18,6 +21,8 @@ interface CreateProductFormProps {
 export default function CreateProductForm({ onProductCreated }: CreateProductFormProps) {
   const [name, setName] = useState("");
   const [price, setPrice] = useState<number | "">("");
+  const [category, setCategory] = useState<"club" | "country">("club");
+  const [sizes, setSizes] = useState<string[]>(["M"]);
   const [image, setImage] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -35,49 +40,62 @@ export default function CreateProductForm({ onProductCreated }: CreateProductFor
     }
   };
 
-  // Clear selected image
   const handleDismissImage = () => {
     setImage(null);
     setPreviewImage(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // Submit product
+  // Handle adding/removing sizes
+  const handleSizeChange = (size: string) => {
+    if (sizes.includes(size)) {
+      setSizes(sizes.filter((s) => s !== size));
+    } else {
+      setSizes([...sizes, size]);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!name || !price) return toast.error("Name and price are required");
+    if (!name || !price) {
+      toast.error("Name and price are required", { position: "top-right", autoClose: 3000 });
+      return;
+    }
 
     try {
       setLoading(true);
       const formData = new FormData();
       formData.append("name", name);
       formData.append("price", price.toString());
+      formData.append("category", category);
+
+      sizes.forEach((size) => formData.append("sizes[]", size));
 
       if (image) {
-        formData.append("image", image); // ⚡ Must match backend field name
+        formData.append("image", image);
       }
 
-      // Send multipart/form-data request
       const res = await axios.post("/admin/products", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       const createdProduct: Product = res.data.data;
 
-      toast.success("Product created successfully");
+      toast.success("Product created successfully!", { position: "top-right", autoClose: 3000 });
 
       // Reset form
       setName("");
       setPrice("");
+      setCategory("club");
+      setSizes(["M"]);
       handleDismissImage();
 
-      // Update parent table immediately
       if (onProductCreated) onProductCreated(createdProduct);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to create jersey");
+      toast.error(error.response?.data?.message || "Failed to create jersey", {
+        position: "top-right",
+        autoClose: 4000,
+      });
     } finally {
       setLoading(false);
     }
@@ -111,15 +129,41 @@ export default function CreateProductForm({ onProductCreated }: CreateProductFor
         />
       </div>
 
+      {/* Category */}
+      <div className="space-y-1">
+        <label className="text-sm font-medium">Category</label>
+        <select
+          className="w-full border rounded px-3 py-2"
+          value={category}
+          onChange={(e) => setCategory(e.target.value as "club" | "country")}
+        >
+          <option value="club">Club</option>
+          <option value="country">Country</option>
+        </select>
+      </div>
+
+      {/* Sizes */}
+      <div className="space-y-1">
+        <label className="text-sm font-medium">Sizes</label>
+        <div className="flex gap-2 flex-wrap">
+          {["S", "M", "L", "XL"].map((size) => (
+            <button
+              key={size}
+              type="button"
+              className={`px-3 py-1 border rounded ${sizes.includes(size) ? "bg-purple-600 text-white" : ""}`}
+              onClick={() => handleSizeChange(size)}
+            >
+              {size}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Image Preview */}
       <div className="mb-4">
         {previewImage ? (
           <div className="relative w-full h-48">
-            <img
-              src={previewImage}
-              alt="Product Preview"
-              className="w-full h-48 object-cover rounded-md"
-            />
+            <img src={previewImage} alt="Product Preview" className="w-full h-48 object-cover rounded-md" />
             <button
               type="button"
               onClick={handleDismissImage}
