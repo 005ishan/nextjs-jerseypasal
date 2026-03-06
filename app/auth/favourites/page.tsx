@@ -40,9 +40,15 @@ export default function FavouritePage() {
     const fetchFavourites = async () => {
       try {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
-        if (!user?._id) { setLoading(false); return; }
+        if (!user?._id) {
+          setLoading(false);
+          return;
+        }
         const res = await axios.get(`/api/users/${user._id}/favourite`);
-        setFavourites(res.data);
+        // Filter out orphaned favourites where the product has been deleted
+        setFavourites(
+          res.data.filter((item: FavouriteItem) => item.product != null)
+        );
       } catch (error) {
         console.error(error);
         toast.error("Failed to load favourites");
@@ -57,7 +63,9 @@ export default function FavouritePage() {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       await axios.post(`/api/users/${user._id}/favourite`, { productId });
-      setFavourites((prev) => prev.filter((item) => item.product._id !== productId));
+      setFavourites((prev) =>
+        prev.filter((item) => item.product?._id !== productId)
+      );
       toast.success("Removed from favourites");
     } catch (error) {
       console.error(error);
@@ -93,7 +101,9 @@ export default function FavouritePage() {
         <div className="mb-10 flex items-center gap-4">
           <h1 className="text-4xl font-bold">My Favourites</h1>
           {!loading && favourites.length > 0 && (
-            <span className="text-sm text-gray-500">{favourites.length} item{favourites.length !== 1 ? "s" : ""}</span>
+            <span className="text-sm text-gray-500">
+              {favourites.length} item{favourites.length !== 1 ? "s" : ""}
+            </span>
           )}
           {loading && (
             <span className="flex items-center gap-2 text-sm text-purple-400 font-medium">
@@ -105,18 +115,25 @@ export default function FavouritePage() {
 
         {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
+            {Array.from({ length: 8 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
           </div>
         ) : favourites.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-32 gap-4 text-center">
             <Heart className="w-16 h-16 text-gray-700" />
-            <p className="text-2xl font-bold text-gray-500">No favourites yet</p>
-            <p className="text-gray-600 text-sm">Browse our jerseys and heart the ones you love.</p>
+            <p className="text-2xl font-bold text-gray-500">
+              No favourites yet
+            </p>
+            <p className="text-gray-600 text-sm">
+              Browse our jerseys and heart the ones you love.
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {favourites.map((item) => {
               const product = item.product;
+              if (!product) return null;
               const imageUrl = product.imageUrl
                 ? product.imageUrl.startsWith("http")
                   ? product.imageUrl
@@ -137,9 +154,15 @@ export default function FavouritePage() {
                     <Heart className="w-6 h-6 fill-red-500 text-red-500 group-hover:fill-red-300 group-hover:text-red-300 transition" />
                   </button>
 
-                  <img src={imageUrl} alt={product.name} className="h-60 w-full object-cover rounded-lg" />
+                  <img
+                    src={imageUrl}
+                    alt={product.name}
+                    className="h-60 w-full object-cover rounded-lg"
+                  />  
 
-                  <p className="mt-4 font-semibold text-center">{product.name}</p>
+                  <p className="mt-4 font-semibold text-center">
+                    {product.name}
+                  </p>
 
                   {product.sizes && product.sizes.length > 0 && (
                     <p className="text-gray-400 text-sm text-center mt-1">
@@ -147,9 +170,13 @@ export default function FavouritePage() {
                     </p>
                   )}
 
-                  <p className="text-center mt-2 font-medium text-purple-400">Rs. {product.price}</p>
+                  <p className="text-center mt-2 font-medium text-purple-400">
+                    Rs. {product.price}
+                  </p>
 
-                  <p className="text-center text-xs text-gray-600 mt-2 capitalize">{product.category} jersey</p>
+                  <p className="text-center text-xs text-gray-600 mt-2 capitalize">
+                    {product.category} jersey
+                  </p>
                 </div>
               );
             })}
